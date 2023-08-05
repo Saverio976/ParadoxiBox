@@ -1,0 +1,4 @@
+{% csrf_token %}
+{% for song in songs %}
+    <li><a href="{% url 'songs:song' song.id %}">{{ song }}</a></li>
+{% endfor %}

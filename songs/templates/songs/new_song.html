@@ -1,0 +1,12 @@
+<form action="{% url 'songs:new_song_api' %}" method="post">
+{% csrf_token %}
+<fieldset>
+    <legend><h1>Add New Song</h1></legend>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+    <label for="title">Song Title: </label>
+    <input type="text" name="title" id="title_song" required>
+    <label for="artist">Song Artist: </label>
+    <input type="text" name="artist" id="artist_song" required>
+</fieldset>
+<input type="submit" value="Submit">
+</form>
