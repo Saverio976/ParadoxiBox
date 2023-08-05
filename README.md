@@ -11,3 +11,10 @@ Available now:
 TODO:
 - Pause/Resume the music
 - Skip a song
+
+## USAGE
+
+```bash
+make install
+make runserver HOST=127.0.0.1 PORT=8000
+```
