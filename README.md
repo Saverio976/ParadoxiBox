@@ -5,9 +5,9 @@ Work In Progress
 Available now:
 - Show downloaded musics
 - Download new music (download first result of {artist} {title} in youtube)
+- Play one music in the server
+- Play a queue in the server
 
 TODO:
-- Play one music in the server
 - Pause/Resume the music
-- Play a playlist in the server
 - Skip a song
