@@ -3,13 +3,13 @@ from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from django.views.static import serve
-import os
 from pathlib import Path
 import datetime
 
 import yt_dlp
 
-from .models import Song, Playlist
+from .models import Song
+from .player import PLAYER
 
 def index(request):
     template = loader.get_template("songs/index.html")
@@ -22,29 +22,23 @@ def downloaded_songs(request):
     context = {"songs": all_songs}
     return HttpResponse(template.render(context, request))
 
-def playlists(_):
-    output = "".join([f"- {playlist}\n" for playlist in Playlist.objects.all()])
-    if output:
-        return HttpResponse(output)
-    return HttpResponse("No Playlists for now")
-
 def song(request, song_id):
     song = Song.objects.get(id=song_id)
     template = loader.get_template("songs/song.html")
-    context = {"song": song}
+    context = {"song": song, "song_id": song_id}
     return HttpResponse(template.render(context, request))
 
 def new_song_api(request):
     title = request.POST["title"]
     artist = request.POST["artist"]
     ydl_opts = {
-        'format': 'm4a/bestaudio/best',
+        'format': 'mp3/bestaudio/best',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'm4a',
+            'preferredcodec': 'mp3',
         }],
         "paths": {
-            "home": f"{os.environ['HOME']}/Music",
+            "home": f"{settings.MEDIA_ROOT / 'songs'}",
         },
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -68,3 +62,19 @@ def download_song(request, path):
     path_song = Path("songs") / path
     print(path_song)
     return serve(request, path_song, document_root=settings.MEDIA_ROOT)
+
+def queue_add_song_api(_, song_id):
+    song = Song.objects.get(id=song_id)
+    PLAYER.queue(song)
+    return HttpResponseRedirect(reverse("songs:queue"))
+
+def queue(request):
+    playlist = PLAYER.get_list_song()
+    current_song = PLAYER.get_current_song()
+    if current_song is None:
+        template = loader.get_template("songs/queue_empty.html")
+        context = {}
+        return HttpResponse(template.render(context, request))
+    template = loader.get_template("songs/queue.html")
+    context = {"playlists": playlist, "song_curr": current_song, "song_curr_id": str(current_song.id)}
+    return HttpResponse(template.render(context, request))

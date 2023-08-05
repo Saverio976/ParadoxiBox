@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <title>ParadoxiBox - {% block title %}{% endblock %}</title>
+</head>
+
+<body>
+    <script>
+        window.setTimeout(function() {
+            if (!document.hidden) {
+                window.location.reload();
+            }
+            window.addEventListener("focus", function() {
+                window.location.reload();
+            });
+        }, 5000);
+    </script>
+    <div id="sidebar">
+        <h1>ParadoxiBox - {% block headerTitle %}{% endblock %}</h1>
+        {% block sidebar %}
+        <ul>
+            <li><a href="{% url 'songs:index' %}">Main Page</a></li>
+            <li><a href="{% url 'songs:queue' %}">Queue</a></li>
+            <li><a href="{% url 'songs:downloaded_songs' %}">List of Songs</a></li>
+            <li><a href="{% url 'songs:new_song' %}">Add a Song</a></li>
+        </ul>
+        {% endblock %}
+    </div>
+
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

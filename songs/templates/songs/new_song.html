@@ -1,3 +1,9 @@
+{% extends "songs/base.html" %}
+
+{% block title %}New Song{% endblock %}
+{% block headerTitle %}Add New Song{% endblock %}
+
+{% block content %}
 <form action="{% url 'songs:new_song_api' %}" method="post">
 {% csrf_token %}
 <fieldset>
@@ -10,3 +16,4 @@
 </fieldset>
 <input type="submit" value="Submit">
 </form>
+{% endblock %}

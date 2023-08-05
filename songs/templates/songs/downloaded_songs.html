@@ -1,4 +1,10 @@
-{% csrf_token %}
+{% extends "songs/base.html" %}
+
+{% block title %}Downloaded Songs{% endblock %}
+{% block headerTitle %}List of Already Downloaded Songs{% endblock %}
+
+{% block content %}
 {% for song in songs %}
     <li><a href="{% url 'songs:song' song.id %}">{{ song }}</a></li>
 {% endfor %}
+{% endblock %}

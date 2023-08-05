@@ -1,5 +1,8 @@
-<h1>ParadoxiBox</h1>
+{% extends "songs/base.html" %}
 
-<li><a href="{% url 'songs:downloaded_songs' %}">Downloaded songs</a></li>
-<li><a href="{% url 'songs:new_song' %}">Add New Song</a></li>
-<li><a href="{% url 'songs:playlists' %}">Playlists</a></li>
+{% block title %}Index{% endblock %}
+{% block headerTitle %}Index{% endblock %}
+
+{% block content %}
+<p>The Amazing ParadoxiBox</p>
+{% endblock %}
