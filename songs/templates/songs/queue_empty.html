@@ -2,12 +2,13 @@
 
 {% block script %}
 window.setTimeout(function() {
-    if (!document.hidden) {
+    if (!document.hidden && document.hasFocus()) {
         window.location.reload();
+    } else {
+        window.addEventListener("focus", function() {
+            window.location.reload();
+        });
     }
-    window.addEventListener("focus", function() {
-        window.location.reload();
-    });
 }, 5000);
 {% endblock %}
 

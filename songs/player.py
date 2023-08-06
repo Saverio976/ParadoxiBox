@@ -21,7 +21,7 @@ class Player:
         self._paused = False
 
     def _init_process(self) -> None:
-        if self._process is None or self._process.is_alive() is False:
+        if not self._process or self._process.is_alive() is False:
             self._process = Process(
                 target=self._process_loop,
                 args=(self._queue_song, self._queue_action, self._queue_process_msg),
@@ -37,6 +37,7 @@ class Player:
     ):
         stop = False
         pygame.mixer.init()
+        paused = False
         while stop is False:
             if queue_song.empty() is False:
                 song = queue_song.get()
@@ -45,7 +46,7 @@ class Player:
                 pygame.mixer.music.play()
             else:
                 time.sleep(0.1)
-            while pygame.mixer.music.get_busy():
+            while pygame.mixer.music.get_busy() or paused:
                 if queue_action.empty():
                     time.sleep(0.1)
                     continue
@@ -53,13 +54,17 @@ class Player:
                 match action:
                     case "pause":
                         pygame.mixer.music.pause()
+                        paused = True
                     case "resume":
                         pygame.mixer.music.unpause()
+                        paused = False
                     case "next":
                         pygame.mixer.music.stop()
+                        paused = False
                     case "stop":
                         pygame.mixer.music.stop()
                         stop = True
+                        paused = False
             queue_process_msg.put("next")
 
     def queue(self, song: Song) -> None:
@@ -86,7 +91,12 @@ class Player:
         self._queue_action.put("stop")
         if self._process:
             self._process.join()
-            self._process = None
+        self._process = None
+        self._playlist = []
+        self._current_song = None
+        self._queue_action = Queue()
+        self._queue_process_msg = Queue()
+        self._queue_song = Queue()
 
     def _proccess_msg_queue(self) -> None:
         while self._queue_process_msg.empty() is False:

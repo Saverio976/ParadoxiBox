@@ -175,3 +175,15 @@ def queue(request):
         "song_curr_id": str(current_song.id),
     }
     return HttpResponse(template.render(context, request))
+
+def pause_api(_):
+    PLAYER.pause()
+    return HttpResponseRedirect(reverse("songs:queue"))
+
+def resume_api(_):
+    PLAYER.resume()
+    return HttpResponseRedirect(reverse("songs:queue"))
+
+def skip_api(_):
+    PLAYER.next()
+    return HttpResponseRedirect(reverse("songs:queue"))
