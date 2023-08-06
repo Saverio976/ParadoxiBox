@@ -1,12 +1,12 @@
-from django.urls import reverse
-from django.template import loader
-from django.http import HttpResponse, HttpResponseRedirect
-from django.conf import settings
-from django.views.static import serve
-from pathlib import Path
 import datetime
+from pathlib import Path
 
 import yt_dlp
+from django.conf import settings
+from django.http import HttpResponse, HttpResponseRedirect
+from django.template import loader
+from django.urls import reverse
+from django.views.static import serve
 
 from .models import Song
 from .player import PLAYER

@@ -1,10 +1,10 @@
-from django.dispatch import receiver
-from django.utils.autoreload import file_changed
+import time
 from multiprocessing import Process, Queue
 from typing import List, Optional
-import time
 
 import pygame
+from django.dispatch import receiver
+from django.utils.autoreload import file_changed
 
 from .models import Song
 
