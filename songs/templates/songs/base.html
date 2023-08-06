@@ -7,14 +7,7 @@
 
 <body>
     <script>
-        window.setTimeout(function() {
-            if (!document.hidden) {
-                window.location.reload();
-            }
-            window.addEventListener("focus", function() {
-                window.location.reload();
-            });
-        }, 5000);
+        {% block script %}{% endblock %}
     </script>
     <div id="sidebar">
         <h1>ParadoxiBox - {% block headerTitle %}{% endblock %}</h1>

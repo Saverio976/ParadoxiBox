@@ -1,5 +1,16 @@
 {% extends "songs/base.html" %}
 
+{% block script %}
+window.setTimeout(function() {
+    if (!document.hidden) {
+        window.location.reload();
+    }
+    window.addEventListener("focus", function() {
+        window.location.reload();
+    });
+}, 5000);
+{% endblock %}
+
 {% block title %}Queue{% endblock %}
 {% block headerTitle %}Queue{% endblock %}
 
