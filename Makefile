@@ -1,9 +1,28 @@
-HOST		?=		127.0.0.1
-PORT		?=		8000
-PACKAGE		?=
+HOST			?=		127.0.0.1
+PORT			?=		8000
+ALLOWED_HOST	?=		*
+LANGUAGE_CODE	?=		en-us
+TIME_ZONE		?=		Europe/Paris
+SECRET_KEY		?=		django-secret-key-wow-so-random0123456789
+PACKAGE			?=
 
-runserver:
-	source ./.venv/bin/activate && ./manage.py runserver ${HOST}:${PORT}
+runserver-dev:
+	source ./.venv/bin/activate && 				\
+		ALLOWED_HOST=${ALLOWED_HOST} 			\
+		DEBUG=True								\
+		LANGUAGE_CODE=${LANGUAGE_CODE} 			\
+		TIME_ZONE=${TIME_ZONE} 					\
+		SECRET_KEY=${SECRET_KEY} 				\
+		./manage.py runserver ${HOST}:${PORT}
+
+runserver-prod:
+	source ./.venv/bin/activate &&				\
+		ALLOWED_HOST=${ALLOWED_HOST} 			\
+		DEBUG=False								\
+		LANGUAGE_CODE=${LANGUAGE_CODE} 			\
+		TIME_ZONE=${TIME_ZONE} 					\
+		SECRET_KEY=${SECRET_KEY} 				\
+		daphne ParadoxiBox.asgi:application -p ${PORT} -b ${HOST}
 
 migrate:
 	source ./.venv/bin/activate && ./manage.py migrate
