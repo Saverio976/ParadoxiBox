@@ -8,7 +8,8 @@ import pygame
 
 from .models import Song
 
-class Player():
+
+class Player:
     def __init__(self) -> None:
         self._playlist: List[Song] = []
         self._current_song: Optional[Song] = None
@@ -21,10 +22,19 @@ class Player():
 
     def _init_process(self) -> None:
         if self._process is None or self._process.is_alive() is False:
-            self._process = Process(target=self._process_loop, args=(self._queue_song, self._queue_action, self._queue_process_msg), daemon=True)
+            self._process = Process(
+                target=self._process_loop,
+                args=(self._queue_song, self._queue_action, self._queue_process_msg),
+                daemon=True,
+            )
             self._process.start()
 
-    def _process_loop(self, queue_song: "Queue[Song]", queue_action: "Queue[str]", queue_process_msg: "Queue[str]"):
+    def _process_loop(
+        self,
+        queue_song: "Queue[Song]",
+        queue_action: "Queue[str]",
+        queue_process_msg: "Queue[str]",
+    ):
         stop = False
         pygame.mixer.init()
         while stop is False:
@@ -97,6 +107,7 @@ class Player():
 
 
 PLAYER = Player()
+
 
 @receiver(file_changed)
 def on_file_changed(sender, **kwargs):
