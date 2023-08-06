@@ -4,15 +4,35 @@
 {% block headerTitle %}Add New Song{% endblock %}
 
 {% block content %}
-<form action="{% url 'songs:new_song_api' %}" method="post">
+<form action="{% url 'songs:new_song_api_search' %}" method="post">
 {% csrf_token %}
 <fieldset>
-    <legend><h1>Add New Song</h1></legend>
+    <legend><h1>Add New Song (with pattern)</h1></legend>
     {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-    <label for="title">Song Title: </label>
-    <input type="text" name="title" id="title_song" required>
-    <label for="artist">Song Artist: </label>
-    <input type="text" name="artist" id="artist_song" required>
+    <label for="search">Search: </label>
+    <input type="text" name="search" id="search" required>
+</fieldset>
+<input type="submit" value="Submit">
+</form>
+
+<form action="{% url 'songs:new_song_api_url' %}" method="post">
+{% csrf_token %}
+<fieldset>
+    <legend><h1>Add New Song (with url)</h1></legend>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+    <label for="url">Url: </label>
+    <input type="text" name="url" id="url" required>
+</fieldset>
+<input type="submit" value="Submit">
+</form>
+
+<form action="{% url 'songs:new_song_api_url_playlist' %}" method="post">
+{% csrf_token %}
+<fieldset>
+    <legend><h1>Add Songs from Playlist (with url)</h1></legend>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+    <label for="url">Url: </label>
+    <input type="text" name="url" id="url" required>
 </fieldset>
 <input type="submit" value="Submit">
 </form>

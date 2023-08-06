@@ -32,11 +32,11 @@ def song(request, song_id):
     return HttpResponse(template.render(context, request))
 
 
-def new_song_api(request):
-    title = request.POST["title"]
-    artist = request.POST["artist"]
+def new_song_api_search(request):
+    search = request.POST["search"]
     ydl_opts = {
         "format": "mp3/bestaudio/best",
+        "noplaylist": True,
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
@@ -48,13 +48,15 @@ def new_song_api(request):
         },
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        infos = ydl.extract_info(f"ytsearch:{artist} {title}", download=True)
+        infos = ydl.extract_info(f"ytsearch:{search}", download=True)
     if not infos:
         return HttpResponse("No songs found")
-    source_link = infos["entries"][0]["webpage_url"]
-    path_music = infos["entries"][0]["requested_downloads"][0]["filepath"]
-    duration = datetime.timedelta(seconds=infos["entries"][0]["duration"])
-    thumbnail = infos["entries"][0]["thumbnail"]
+    source_link = infos["webpage_url"]
+    path_music = infos["requested_downloads"][0]["filepath"]
+    duration = datetime.timedelta(seconds=infos["duration"])
+    thumbnail = infos["thumbnail"]
+    artist = infos["channel"]
+    title = infos["title"]
     song = Song(
         title=title,
         artist=artist,
@@ -64,6 +66,80 @@ def new_song_api(request):
         thumbnail=thumbnail,
     )
     song.save()
+    return HttpResponseRedirect(reverse("songs:downloaded_songs"))
+
+def new_song_api_url(request):
+    url = request.POST["url"]
+    ydl_opts = {
+        "format": "mp3/bestaudio/best",
+        "noplaylist": True,
+        "postprocessors": [
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+            }
+        ],
+        "paths": {
+            "home": f"{settings.MEDIA_ROOT / 'songs'}",
+        },
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        infos = ydl.extract_info(f"{url}", download=True)
+    if not infos:
+        return HttpResponse("No songs found")
+    source_link = infos["webpage_url"]
+    path_music = infos["requested_downloads"][0]["filepath"]
+    duration = datetime.timedelta(seconds=infos["duration"])
+    thumbnail = infos["thumbnail"]
+    artist = infos["channel"]
+    title = infos["title"]
+    song = Song(
+        title=title,
+        artist=artist,
+        source_link=source_link,
+        path_music=path_music,
+        duration=duration,
+        thumbnail=thumbnail,
+    )
+    song.save()
+    return HttpResponseRedirect(reverse("songs:downloaded_songs"))
+
+
+def new_song_api_url_playlist(request):
+    url = request.POST["url"]
+    ydl_opts = {
+        "format": "mp3/bestaudio/best",
+        "noplaylist": False,
+        "postprocessors": [
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+            }
+        ],
+        "paths": {
+            "home": f"{settings.MEDIA_ROOT / 'songs'}",
+        },
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        all_songs = ydl.extract_info(f"{url}", download=True)
+    if not all_songs:
+        return HttpResponse("No songs found")
+    for infos in all_songs["entries"]:
+        source_link = infos["webpage_url"]
+        path_music = infos["requested_downloads"][0]["filepath"]
+        duration = datetime.timedelta(seconds=infos["duration"])
+        thumbnail = infos["thumbnail"]
+        artist = infos["channel"]
+        title = infos["title"]
+        song = Song(
+            title=title,
+            artist=artist,
+            source_link=source_link,
+            path_music=path_music,
+            duration=duration,
+            thumbnail=thumbnail,
+        )
+        song.save()
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
 

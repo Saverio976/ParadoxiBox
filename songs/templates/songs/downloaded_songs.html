@@ -1,10 +1,39 @@
 {% extends "songs/base.html" %}
 
+{% block style %}
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+{% endblock %}
+
 {% block title %}Downloaded Songs{% endblock %}
 {% block headerTitle %}List of Already Downloaded Songs{% endblock %}
 
 {% block content %}
-{% for song in songs %}
-    <li><a href="{% url 'songs:song' song.id %}">{{ song }}</a></li>
-{% endfor %}
+<table>
+    <tr>
+        <th>Artist</th>
+        <th>Title</th>
+        <th>Duration</th>
+    </tr>
+    {% for song in songs %}
+    <tr>
+        <td>{{ song.artist }}</td>
+        <td><a href="{% url 'songs:song' song.id %}">{{ song.title }}</a></td>
+        <td>{{ song.duration }}</td>
+    </tr>
+    {% endfor %}
+</table>
 {% endblock %}
