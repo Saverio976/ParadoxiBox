@@ -1,3 +1,5 @@
+from django.dispatch import receiver
+from django.utils.autoreload import file_changed
 from multiprocessing import Process, Queue
 from typing import List, Optional
 import time
@@ -19,7 +21,7 @@ class Player():
 
     def _init_process(self) -> None:
         if self._process is None or self._process.is_alive() is False:
-            self._process = Process(target=self._process_loop, args=(self._queue_song, self._queue_action, self._queue_process_msg))
+            self._process = Process(target=self._process_loop, args=(self._queue_song, self._queue_action, self._queue_process_msg), daemon=True)
             self._process.start()
 
     def _process_loop(self, queue_song: "Queue[Song]", queue_action: "Queue[str]", queue_process_msg: "Queue[str]"):
@@ -95,3 +97,8 @@ class Player():
 
 
 PLAYER = Player()
+
+@receiver(file_changed)
+def on_file_changed(sender, **kwargs):
+    PLAYER.stop()
+    return False

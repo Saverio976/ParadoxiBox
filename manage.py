@@ -15,8 +15,6 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
     execute_from_command_line(sys.argv)
-    from songs.player import PLAYER
-    PLAYER.stop()
 
 
 if __name__ == "__main__":
