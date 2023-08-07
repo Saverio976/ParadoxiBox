@@ -51,20 +51,19 @@ class Player:
                     time.sleep(0.1)
                     continue
                 action = queue_action.get()
-                match action:
-                    case "pause":
-                        pygame.mixer.music.pause()
-                        paused = True
-                    case "resume":
-                        pygame.mixer.music.unpause()
-                        paused = False
-                    case "next":
-                        pygame.mixer.music.stop()
-                        paused = False
-                    case "stop":
-                        pygame.mixer.music.stop()
-                        stop = True
-                        paused = False
+                if action == "pause":
+                    pygame.mixer.music.pause()
+                    paused = True
+                elif action == "resume":
+                    pygame.mixer.music.unpause()
+                    paused = False
+                elif action == "next":
+                    pygame.mixer.music.stop()
+                    paused = False
+                elif action == "stop":
+                    pygame.mixer.music.stop()
+                    stop = True
+                    paused = False
             queue_process_msg.put("next")
 
     def queue(self, song: Song) -> None:

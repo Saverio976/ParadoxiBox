@@ -15,14 +15,24 @@ TODO:
 
 ## USAGE
 
+1. Create Virtualenv + Install dependencies
+
+:warning: Change the PYTHON argument to your latest python :warning:
+
 ```bash
-make install
-# feel free to modify this values
+make install PYTHON=python
+```
+
+2. Run the server
+
+*feel free to modify the arguments values*
+
+```
 make runserver-prod                                         \
-    HOST=127.0.0.1                                          \
-    PORT=8000                                               \
+    HOST='0.0.0.0'                                          \
+    PORT='8000'                                             \
     ALLOWED_HOST='*'                                        \
-    LANGUAGE_CODE=en-us                                     \
-    TIME_ZONE=Europe/Paris                                  \
-    SECRET_KEY=django-secret-key-wow-so-random0123456789
+    LANGUAGE_CODE='en-us'                                   \
+    TIME_ZONE='Europe/Paris'                                \
+    SECRET_KEY='django-secret-key-wow-so-random0123456789'
 ```

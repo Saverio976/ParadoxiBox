@@ -5,9 +5,10 @@ LANGUAGE_CODE	?=		en-us
 TIME_ZONE		?=		Europe/Paris
 SECRET_KEY		?=		django-secret-key-wow-so-random0123456789
 PACKAGE			?=
+PYTHON			?=		python
 
 runserver-dev:
-	source ./.venv/bin/activate && 				\
+	. ./.venv/bin/activate && 				\
 		ALLOWED_HOST=${ALLOWED_HOST} 			\
 		DEBUG=True								\
 		LANGUAGE_CODE=${LANGUAGE_CODE} 			\
@@ -16,7 +17,7 @@ runserver-dev:
 		./manage.py runserver ${HOST}:${PORT}
 
 runserver-prod:
-	source ./.venv/bin/activate &&				\
+	. ./.venv/bin/activate &&				\
 		ALLOWED_HOST=${ALLOWED_HOST} 			\
 		DEBUG=False								\
 		LANGUAGE_CODE=${LANGUAGE_CODE} 			\
@@ -25,24 +26,26 @@ runserver-prod:
 		daphne ParadoxiBox.asgi:application -p ${PORT} -b ${HOST}
 
 migrate:
-	source ./.venv/bin/activate && ./manage.py migrate
+	. ./.venv/bin/activate && ./manage.py migrate
 
 makemigrations:
-	source ./.venv/bin/activate && ./manage.py makemigrations
+	. ./.venv/bin/activate && ./manage.py makemigrations
 
 shell:
-	source ./.venv/bin/activate && ./manage.py shell
+	. ./.venv/bin/activate && ./manage.py shell
 
 createsuperuser:
-	source ./.venv/bin/activate && ./manage.py createsuperuser
+	. ./.venv/bin/activate && ./manage.py createsuperuser
 
 pip-install:
 	if [ -n "${PACKAGE}" ]; then \
 		echo "${PACKAGE}" >> requirements.txt; \
 	fi
 	if [ ! -d "./.venv" ]; then \
-		python -m venv ./.venv; \
+		${PYTHON} -m venv ./.venv; \
 	fi
-	source ./.venv/bin/activate && pip install -r requirements.txt
+	. ./.venv/bin/activate && pip install -U pip
+	. ./.venv/bin/activate && pip install -U wheel
+	. ./.venv/bin/activate && pip install -r requirements.txt
 
 install: pip-install migrate
