@@ -17,6 +17,8 @@ window.setTimeout(function() {
 
 {% block content %}
 
+<p>Paused: {{ paused }}</p>
+
 <a href="{% url 'songs:pause_api' %}">⏸️</a>
 <a href="{% url 'songs:resume_api' %}">▶️</a>
 <a href="{% url 'songs:skip_api' %}">⏭️</a>

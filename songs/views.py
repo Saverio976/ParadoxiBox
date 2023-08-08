@@ -48,10 +48,12 @@ def new_song_api_search(request):
         },
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        infos = ydl.extract_info(f"ytsearch:{search}", download=True)
-    if not infos:
+        datas = ydl.extract_info(f"ytsearch:{search}", download=True)
+    if not datas:
         return HttpResponse("No songs found")
+    infos = datas["entries"][0]
     source_link = infos["webpage_url"]
+    print(infos.keys())
     path_music = infos["requested_downloads"][0]["filepath"]
     duration = datetime.timedelta(seconds=infos["duration"])
     thumbnail = infos["thumbnail"]
@@ -157,6 +159,7 @@ def download_song(request, path):
 
 def queue_add_song_api(_, song_id):
     song = Song.objects.get(id=song_id)
+    print("queuing", song)
     PLAYER.queue(song)
     return HttpResponseRedirect(reverse("songs:queue"))
 
@@ -173,6 +176,7 @@ def queue(request):
         "playlists": playlist,
         "song_curr": current_song,
         "song_curr_id": str(current_song.id),
+        "paused": PLAYER.get_paused(),
     }
     return HttpResponse(template.render(context, request))
 
