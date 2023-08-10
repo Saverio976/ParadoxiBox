@@ -51,6 +51,7 @@ class Player:
                 pygame.mixer.music.play()
             else:
                 time.sleep(0.1)
+                continue
             while pygame.mixer.music.get_busy() or paused:
                 if queue_action.empty():
                     time.sleep(0.1)
@@ -72,23 +73,14 @@ class Player:
             queue_process_msg.put("next")
 
     def queue(self, song: Song) -> None:
-        print(1, self._playlist)
-        print(1, self._current_song)
         self._init_process()
-        print(1, "something here 1")
         self._proccess_msg_queue()
-        print(1, "something here")
-        print(1, self._queue_song)
         if self._queue_song:
-            print(2, self._playlist)
-            print(2, self._current_song)
             self._queue_song.put(song)
             if len(self._playlist) == 0 and self._current_song is None:
                 self._current_song = song
             else:
                 self._playlist.append(song)
-        print(3, self._playlist)
-        print(3, self._current_song)
 
     def pause(self) -> None:
         self._proccess_msg_queue()

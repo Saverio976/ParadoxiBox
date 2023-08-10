@@ -1,7 +1,6 @@
-import datetime
 from pathlib import Path
+from threading import Thread
 
-import yt_dlp
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
@@ -10,6 +9,7 @@ from django.views.static import serve
 
 from .models import Song
 from .player import PLAYER
+from .ytdl import download_song_ytdl
 
 
 def index(request):
@@ -34,114 +34,42 @@ def song(request, song_id):
 
 def new_song_api_search(request):
     search = request.POST["search"]
-    ydl_opts = {
-        "format": "mp3/bestaudio/best",
-        "noplaylist": True,
-        "postprocessors": [
-            {
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "mp3",
-            }
-        ],
-        "paths": {
-            "home": f"{settings.MEDIA_ROOT / 'songs'}",
-        },
-    }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        datas = ydl.extract_info(f"ytsearch:{search}", download=True)
-    if not datas:
-        return HttpResponse("No songs found")
-    infos = datas["entries"][0]
-    source_link = infos["webpage_url"]
-    print(infos.keys())
-    path_music = infos["requested_downloads"][0]["filepath"]
-    duration = datetime.timedelta(seconds=infos["duration"])
-    thumbnail = infos["thumbnail"]
-    artist = infos["channel"]
-    title = infos["title"]
-    song = Song(
-        title=title,
-        artist=artist,
-        source_link=source_link,
-        path_music=path_music,
-        duration=duration,
-        thumbnail=thumbnail,
-    )
-    song.save()
+    Thread(
+        target=download_song_ytdl,
+        args=(
+            settings.MEDIA_ROOT / 'song',
+            f"ytsearch:{search}",
+            True
+        ),
+        daemon=True
+    ).start()
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
 def new_song_api_url(request):
     url = request.POST["url"]
-    ydl_opts = {
-        "format": "mp3/bestaudio/best",
-        "noplaylist": True,
-        "postprocessors": [
-            {
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "mp3",
-            }
-        ],
-        "paths": {
-            "home": f"{settings.MEDIA_ROOT / 'songs'}",
-        },
-    }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        infos = ydl.extract_info(f"{url}", download=True)
-    if not infos:
-        return HttpResponse("No songs found")
-    source_link = infos["webpage_url"]
-    path_music = infos["requested_downloads"][0]["filepath"]
-    duration = datetime.timedelta(seconds=infos["duration"])
-    thumbnail = infos["thumbnail"]
-    artist = infos["channel"]
-    title = infos["title"]
-    song = Song(
-        title=title,
-        artist=artist,
-        source_link=source_link,
-        path_music=path_music,
-        duration=duration,
-        thumbnail=thumbnail,
-    )
-    song.save()
+    Thread(
+        target=download_song_ytdl,
+        args=(
+            settings.MEDIA_ROOT / 'song',
+            f"{url}",
+            True
+        ),
+        daemon=True
+    ).start()
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
 
 def new_song_api_url_playlist(request):
     url = request.POST["url"]
-    ydl_opts = {
-        "format": "mp3/bestaudio/best",
-        "noplaylist": False,
-        "postprocessors": [
-            {
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "mp3",
-            }
-        ],
-        "paths": {
-            "home": f"{settings.MEDIA_ROOT / 'songs'}",
-        },
-    }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        all_songs = ydl.extract_info(f"{url}", download=True)
-    if not all_songs:
-        return HttpResponse("No songs found")
-    for infos in all_songs["entries"]:
-        source_link = infos["webpage_url"]
-        path_music = infos["requested_downloads"][0]["filepath"]
-        duration = datetime.timedelta(seconds=infos["duration"])
-        thumbnail = infos["thumbnail"]
-        artist = infos["channel"]
-        title = infos["title"]
-        song = Song(
-            title=title,
-            artist=artist,
-            source_link=source_link,
-            path_music=path_music,
-            duration=duration,
-            thumbnail=thumbnail,
-        )
-        song.save()
+    Thread(
+        target=download_song_ytdl,
+        args=(
+            settings.MEDIA_ROOT / 'song',
+            f"{url}",
+            True
+        ),
+        daemon=True
+    ).start()
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
 
@@ -153,13 +81,11 @@ def new_song(request):
 
 def download_song(request, path):
     path_song = Path("songs") / path
-    print(path_song)
     return serve(request, path_song, document_root=settings.MEDIA_ROOT)
 
 
 def queue_add_song_api(_, song_id):
     song = Song.objects.get(id=song_id)
-    print("queuing", song)
     PLAYER.queue(song)
     return HttpResponseRedirect(reverse("songs:queue"))
 
