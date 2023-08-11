@@ -35,15 +35,26 @@ def song(request, song_id):
 def new_song_api_search(request):
     search = request.POST["search"]
     to_queue = True if request.POST.get("to_queue", False) else False
-    download_song_helper(f"ytsearch:{search}", noplaylist=True, threaded=True, add_to_queue=to_queue)
+    download_song_helper(
+        f"ytsearch:{search}",
+        noplaylist=True,
+        to_execute=lambda song: PLAYER.queue(song),
+        threaded=True,
+    )
     if to_queue:
         return HttpResponseRedirect(reverse("songs:queue"))
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
+
 def new_song_api_url(request):
     url = request.POST["url"]
     to_queue = True if request.POST.get("to_queue", False) else False
-    download_song_helper(f"{url}", noplaylist=True, threaded=True, add_to_queue=to_queue)
+    download_song_helper(
+        f"{url}",
+        noplaylist=True,
+        to_execute=lambda song: PLAYER.queue(song),
+        threaded=True,
+    )
     if to_queue:
         return HttpResponseRedirect(reverse("songs:queue"))
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
@@ -52,7 +63,12 @@ def new_song_api_url(request):
 def new_song_api_url_playlist(request):
     url = request.POST["url"]
     to_queue = True if request.POST.get("to_queue", False) else False
-    download_song_helper(f"{url}", noplaylist=False, threaded=True, add_to_queue=to_queue)
+    download_song_helper(
+        f"{url}",
+        noplaylist=False,
+        to_execute=lambda song: PLAYER.queue(song),
+        threaded=True,
+    )
     if to_queue:
         return HttpResponseRedirect(reverse("songs:queue"))
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
@@ -93,21 +109,26 @@ def queue(request):
     }
     return HttpResponse(template.render(context, request))
 
+
 def pause_api(_):
     PLAYER.pause()
     return HttpResponseRedirect(reverse("songs:queue"))
+
 
 def resume_api(_):
     PLAYER.resume()
     return HttpResponseRedirect(reverse("songs:queue"))
 
+
 def skip_api(_):
     PLAYER.next()
     return HttpResponseRedirect(reverse("songs:queue"))
 
+
 def improvise_api(_):
     PLAYER.toggle_improvise()
     return HttpResponseRedirect(reverse("songs:queue"))
+
 
 def library_used(request):
     template = loader.get_template("songs/library_used.html")

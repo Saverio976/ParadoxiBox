@@ -1,18 +1,23 @@
-from typing import Optional, Tuple, List
+from datetime import timedelta
+from typing import List, Optional, Tuple
+
 import yt_dlp
 from ytmusicapi.ytmusic import YTMusic
-from datetime import timedelta
-from .models import Song
+
 from .logger import logger_print
+from .models import Song
+
 
 def video_id_to_url(video_id: str) -> str:
     return f"https://music.youtube.com/watch?v={video_id}"
 
+
 def search_song(query: str) -> Tuple[str, str]:
     yt = YTMusic()
-    results = yt.search(query, filter = "songs", limit=1)
+    results = yt.search(query, filter="songs", limit=1)
     videoId = results[0]["videoId"]
     return video_id_to_url(videoId), videoId
+
 
 def get_next_related(query: str, limit: int = -1) -> List[str]:
     _, videoId = search_song(query)
@@ -25,9 +30,12 @@ def get_next_related(query: str, limit: int = -1) -> List[str]:
     res = [item["videoId"] for item in nexts[0]["contents"][:limit]]
     return res
 
-def download_song_ytdl(home_path: str, search: str, noplaylist: bool = False) -> Optional[List[Song]]:
+
+def download_song_ytdl(
+    home_path: str, search: str, noplaylist: bool = False
+) -> Optional[List[Song]]:
     if search.startswith("ytsearch:"):
-        search = search[len("ytsearch:"):]
+        search = search[len("ytsearch:") :]
         search, _ = search_song(search)
     ydl_opts = {
         "format": "mp3/bestaudio/best",

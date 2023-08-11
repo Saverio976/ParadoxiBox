@@ -8,7 +8,11 @@ urlpatterns = [
     path("downloaded_songs", views.downloaded_songs, name="downloaded_songs"),
     path("newsong", views.new_song, name="new_song"),
     path("api/newsong/url", views.new_song_api_url, name="new_song_api_url"),
-    path("api/newsong/url/playlist", views.new_song_api_url_playlist, name="new_song_api_url_playlist"),
+    path(
+        "api/newsong/url/playlist",
+        views.new_song_api_url_playlist,
+        name="new_song_api_url_playlist",
+    ),
     path("api/newsong/search", views.new_song_api_search, name="new_song_api_search"),
     path("api/pause", views.pause_api, name="pause_api"),
     path("api/resume", views.resume_api, name="resume_api"),
