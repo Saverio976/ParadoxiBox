@@ -56,7 +56,7 @@ class Player:
                 pygame.mixer.music.load(filename)
                 pygame.mixer.music.play()
                 last_played = song
-            elif self._improvise is True and last_played is not None:
+            elif improvise is True and last_played is not None:
                 logger_print("Auto next trying to guess")
                 try:
                     videos_id_next = get_next_related(f"{last_played.artist} {last_played.title}", limit=1)
