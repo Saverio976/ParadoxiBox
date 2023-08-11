@@ -8,6 +8,7 @@ from django.conf import settings
 
 from .models import Song
 from .ytdl import get_next_related, download_song_ytdl, video_id_to_url
+from .logger import logger_print
 
 
 class Player:
@@ -24,7 +25,7 @@ class Player:
 
     def _init_process(self) -> None:
         if self._process_started is False:
-            print("Starting process")
+            logger_print("Starting process")
             self._queue_song = Queue()
             self._queue_action = Queue()
             self._queue_process_msg = Queue()
@@ -56,7 +57,7 @@ class Player:
                 pygame.mixer.music.play()
                 last_played = song
             elif self._improvise is True and last_played is not None:
-                print("Auto next trying to guess")
+                logger_print("Auto next trying to guess")
                 try:
                     videos_id_next = get_next_related(f"{last_played.artist} {last_played.title}", limit=1)
                     url_next = video_id_to_url(videos_id_next[0])
@@ -64,7 +65,7 @@ class Player:
                     for song in next_songs or []:
                         queue_song.put(song)
                 except Exception as esc:
-                    print(esc)
+                    logger_print(esc)
                     last_played = None
                     continue
             else:
@@ -92,7 +93,7 @@ class Player:
                     improvise = True
                 elif action == "improvise_false":
                     improvise = False
-                print("Improvise:", improvise)
+                logger_print("Improvise:", improvise)
             queue_process_msg.put("next")
 
     def queue(self, song: Song) -> None:
