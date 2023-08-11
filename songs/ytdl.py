@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 import yt_dlp
 from ytmusicapi.ytmusic import YTMusic
 from datetime import timedelta
