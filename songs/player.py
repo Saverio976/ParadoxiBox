@@ -41,6 +41,7 @@ class Player:
         queue_song: "Queue[Song]",
         queue_action: "Queue[str]",
         queue_process_msg: "Queue[str]",
+        improvise: bool
     ):
         import pygame
         stop = False
@@ -55,6 +56,7 @@ class Player:
                 pygame.mixer.music.play()
                 last_played = song
             elif self._improvise is True and last_played is not None:
+                print("Auto next trying to guess")
                 try:
                     videos_id_next = get_next_related(f"{last_played.artist} {last_played.title}", limit=1)
                     url_next = video_id_to_url(videos_id_next[0])
@@ -86,6 +88,10 @@ class Player:
                     pygame.mixer.music.stop()
                     stop = True
                     paused = False
+                elif action == "improvise_true":
+                    improvise = True
+                elif action == "improvise_false":
+                    improvise = False
             queue_process_msg.put("next")
 
     def queue(self, song: Song) -> None:
@@ -153,6 +159,8 @@ class Player:
 
     def toggle_improvise(self) -> None:
         self._improvise = not self._improvise
+        if self._queue_action:
+            self._queue_action.put(f"improvise_{'true' if self._improvise else 'false'}")
 
     def get_improvise(self) -> bool:
         return self._improvise
