@@ -49,7 +49,10 @@ def download_song_ytdl(home_path: str, search: str, noplaylist: bool = False):
         return None
     infos = {"entries": []}
     if noplaylist:
-        infos["entries"] = [datas]
+        if "entries" in datas.keys():
+            infos["entries"] = datas["entries"][:1]
+        else:
+            infos["entries"] = [datas]
     else:
         infos["entries"] = datas["entries"]
     saved = []
@@ -70,4 +73,5 @@ def download_song_ytdl(home_path: str, search: str, noplaylist: bool = False):
         )
         song.save()
         saved.append(song)
+    logger_print("YTDLP: download finished:", search)
     return saved
