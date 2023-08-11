@@ -61,9 +61,11 @@ class Player:
                 try:
                     videos_id_next = get_next_related(f"{last_played.artist} {last_played.title}", limit=1)
                     url_next = video_id_to_url(videos_id_next[0])
+                    logger_print(url_next)
                     next_songs = download_song_ytdl(settings.MEDIA_ROOT / 'song', url_next, True)
                     for song in next_songs or []:
                         queue_song.put(song)
+                        logger_print("adding", next_songs)
                 except Exception as esc:
                     logger_print(esc)
                     last_played = None
