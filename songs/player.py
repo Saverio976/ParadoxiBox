@@ -65,6 +65,7 @@ class Player:
                     next_songs = download_song_ytdl(settings.MEDIA_ROOT / 'song', url_next, True)
                     for song in next_songs or []:
                         queue_song.put(song)
+                        queue_process_msg.put(f"adding:{song.id}")
                         logger_print("adding", next_songs)
                 except Exception as esc:
                     logger_print(esc)
@@ -98,15 +99,20 @@ class Player:
                 logger_print("Improvise:", improvise)
             queue_process_msg.put("next")
 
+    def _queue(self, song: Song) -> None:
+        if self._queue_song:
+            if len(self._playlist) == 0 and self._current_song is None:
+                self._current_song = song
+            else:
+                self._playlist.append(song)
+
+
     def queue(self, song: Song) -> None:
         self._init_process()
         self._proccess_msg_queue()
         if self._queue_song:
             self._queue_song.put(song)
-            if len(self._playlist) == 0 and self._current_song is None:
-                self._current_song = song
-            else:
-                self._playlist.append(song)
+            self._queue(song)
 
     def pause(self) -> None:
         self._proccess_msg_queue()
@@ -148,6 +154,10 @@ class Player:
                         self._current_song = self._playlist.pop(0)
                     else:
                         self._current_song = None
+                if msg.startswith("adding:"):
+                    msg = msg[len("adding:"):]
+                    song = Song.objects.get(id=msg)
+                    self._queue(song)
 
     def get_list_song(self) -> List[Song]:
         self._proccess_msg_queue()

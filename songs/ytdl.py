@@ -10,18 +10,15 @@ def video_id_to_url(video_id: str) -> str:
 
 def search_song(query: str) -> Tuple[str, str]:
     yt = YTMusic()
-    results = yt.search(query, filter = "songs")
+    results = yt.search(query, filter = "songs", limit=1)
     videoId = results[0]["videoId"]
-    return search_song(videoId), videoId
+    return video_id_to_url(videoId), videoId
 
 def get_next_related(query: str, limit: int = -1) -> List[str]:
     _, videoId = search_song(query)
-    logger_print(videoId)
     yt = YTMusic()
     playlist = yt.get_watch_playlist(videoId)
-    logger_print("result from watch list")
     nexts = yt.get_song_related(playlist["related"])
-    logger_print("result from related list")
     res = []
     if limit <= 0:
         limit = len(nexts[0]["contents"])
@@ -30,7 +27,7 @@ def get_next_related(query: str, limit: int = -1) -> List[str]:
 
 def download_song_ytdl(home_path: str, search: str, noplaylist: bool = False):
     if search.startswith("ytsearch:"):
-        search = search[:len("ytsearch:")]
+        search = search[len("ytsearch:"):]
         search, _ = search_song(search)
     ydl_opts = {
         "format": "mp3/bestaudio/best",
@@ -45,6 +42,7 @@ def download_song_ytdl(home_path: str, search: str, noplaylist: bool = False):
             "home": f"{home_path}",
         },
     }
+    logger_print("YTDLP: downloading:", search)
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         datas = ydl.extract_info(f"{search}", download=True)
     if not datas:
