@@ -67,6 +67,7 @@ class Player:
                         queue_song.put(song)
                         queue_process_msg.put(f"adding:{song.id}")
                         logger_print("adding", next_songs)
+                    continue
                 except Exception as esc:
                     logger_print(esc)
                     last_played = None
