@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Optional, Tuple, List
 import yt_dlp
 from ytmusicapi.ytmusic import YTMusic
 from datetime import timedelta
@@ -25,7 +25,7 @@ def get_next_related(query: str, limit: int = -1) -> List[str]:
     res = [item["videoId"] for item in nexts[0]["contents"][:limit]]
     return res
 
-def download_song_ytdl(home_path: str, search: str, noplaylist: bool = False):
+def download_song_ytdl(home_path: str, search: str, noplaylist: bool = False) -> Optional[List[Song]]:
     if search.startswith("ytsearch:"):
         search = search[len("ytsearch:"):]
         search, _ = search_song(search)

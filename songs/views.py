@@ -9,7 +9,7 @@ from django.views.static import serve
 
 from .models import Song
 from .player import PLAYER
-from .ytdl import download_song_ytdl
+from .song_download_helper import download_song_helper
 
 
 def index(request):
@@ -34,42 +34,27 @@ def song(request, song_id):
 
 def new_song_api_search(request):
     search = request.POST["search"]
-    Thread(
-        target=download_song_ytdl,
-        args=(
-            settings.MEDIA_ROOT / 'song',
-            f"ytsearch:{search}",
-            True
-        ),
-        daemon=True
-    ).start()
+    to_queue = True if request.POST.get("to_queue", False) else False
+    download_song_helper(f"ytsearch:{search}", noplaylist=True, threaded=True, add_to_queue=to_queue)
+    if to_queue:
+        return HttpResponseRedirect(reverse("songs:queue"))
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
 def new_song_api_url(request):
     url = request.POST["url"]
-    Thread(
-        target=download_song_ytdl,
-        args=(
-            settings.MEDIA_ROOT / 'song',
-            f"{url}",
-            True
-        ),
-        daemon=True
-    ).start()
+    to_queue = True if request.POST.get("to_queue", False) else False
+    download_song_helper(f"{url}", noplaylist=True, threaded=True, add_to_queue=to_queue)
+    if to_queue:
+        return HttpResponseRedirect(reverse("songs:queue"))
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
 
 def new_song_api_url_playlist(request):
     url = request.POST["url"]
-    Thread(
-        target=download_song_ytdl,
-        args=(
-            settings.MEDIA_ROOT / 'song',
-            f"{url}",
-            True
-        ),
-        daemon=True
-    ).start()
+    to_queue = True if request.POST.get("to_queue", False) else False
+    download_song_helper(f"{url}", noplaylist=False, threaded=True, add_to_queue=to_queue)
+    if to_queue:
+        return HttpResponseRedirect(reverse("songs:queue"))
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
 
