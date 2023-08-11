@@ -18,4 +18,5 @@ urlpatterns = [
     path("media/songs/<path>", views.download_song, name="media_songs"),
     path("queue/add/<song_id>", views.queue_add_song_api, name="queue_song_api"),
     path("queue", views.queue, name="queue"),
+    path("library_used", views.library_used, name="library_used"),
 ]

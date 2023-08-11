@@ -77,7 +77,7 @@ def queue_add_song_api(_, song_id):
 
 def queue(request):
     playlist = PLAYER.get_list_song()
-    current_song = PLAYER.get_current_song()
+    current_song, timed = PLAYER.get_current_song()
     if current_song is None:
         template = loader.get_template("songs/queue_empty.html")
         context = {}
@@ -87,6 +87,7 @@ def queue(request):
         "playlists": playlist,
         "song_curr": current_song,
         "song_curr_id": str(current_song.id),
+        "song_curr_timed": timed,
         "paused": PLAYER.get_paused(),
         "improvised": PLAYER.get_improvise(),
     }
@@ -107,3 +108,8 @@ def skip_api(_):
 def improvise_api(_):
     PLAYER.toggle_improvise()
     return HttpResponseRedirect(reverse("songs:queue"))
+
+def library_used(request):
+    template = loader.get_template("songs/library_used.html")
+    context = {}
+    return HttpResponse(template.render(context, request))
