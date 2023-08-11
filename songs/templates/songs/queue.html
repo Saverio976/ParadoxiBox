@@ -26,9 +26,9 @@ window.setTimeout(function() {
 <a href="{% url 'songs:skip_api' %}">⏭️ </a>
 <a href="{% url 'songs:improvise_api' %}">🎲</a>
 
-<p>Curently Playing: <a href="{% url 'songs:song' song_curr_id %}">{{ song_curr.artist }} - {{ song_curr.title }}</p>
+<p>Curently Playing: <a href="{% url 'songs:song' song_curr_id %}">{{ song_curr }}</a> [listened {{ song_curr_timed }}]</p>
 
 {% for song in playlists %}
-    <li><a href="{% url 'songs:song' song.id %}">{{ song.artist }} - {{ song.title }} ({{ song.duration }})</a></li>
+    <li><a href="{% url 'songs:song' song.id %}"> {{ song }} </a></li>
 {% endfor %}
 {% endblock %}

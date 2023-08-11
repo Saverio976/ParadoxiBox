@@ -1,20 +1,24 @@
+from datetime import timedelta
 import time
 from multiprocessing import Process, Queue
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from django.dispatch import receiver
 from django.utils.autoreload import file_changed
-from django.conf import settings
 
 from .models import Song
-from .ytdl import get_next_related, download_song_ytdl, video_id_to_url
+from .ytdl import get_next_related, video_id_to_url
 from .logger import logger_print
+from .song_download_helper import download_song_helper
+
+DEFAULT_NUMBER_IMPROVISE = 2
 
 
 class Player:
     def __init__(self) -> None:
         self._playlist: List[Song] = []
         self._current_song: Optional[Song] = None
+        self._current_song_time: Optional[float] = None
         self._queue_song: Optional["Queue[Song]"] = None
         self._queue_action: Optional["Queue[str]"] = None
         self._queue_process_msg: Optional["Queue[str]"] = None
@@ -59,14 +63,11 @@ class Player:
             elif improvise is True and last_played is not None:
                 logger_print("Auto next trying to guess")
                 try:
-                    videos_id_next = get_next_related(f"{last_played.artist} {last_played.title}", limit=1)
-                    url_next = video_id_to_url(videos_id_next[0])
-                    logger_print(url_next)
-                    next_songs = download_song_ytdl(settings.MEDIA_ROOT / 'song', url_next, True)
-                    for song in next_songs or []:
-                        queue_song.put(song)
-                        queue_process_msg.put(f"adding:{song.id}")
-                        logger_print("adding", next_songs)
+                    videos_id_next = get_next_related(f"{last_played.artist} {last_played.title}", limit=DEFAULT_NUMBER_IMPROVISE)
+                    for vid in videos_id_next:
+                        url_next = video_id_to_url(vid)
+                        download_song_helper(url_next, noplaylist=True, threaded=True, add_to_queue=True)
+                    last_played = None
                     continue
                 except Exception as esc:
                     logger_print(esc)
@@ -97,7 +98,8 @@ class Player:
                     improvise = True
                 elif action == "improvise_false":
                     improvise = False
-                logger_print("Improvise:", improvise)
+                elif action == "get_pos":
+                    queue_process_msg.put("pos:" + str(pygame.mixer.music.get_pos()))
             queue_process_msg.put("next")
 
     def _queue(self, song: Song) -> None:
@@ -141,6 +143,7 @@ class Player:
         self._process = None
         self._playlist = []
         self._current_song = None
+        self._current_song_time = None
         self._queue_action = None
         self._queue_process_msg = None
         self._queue_song = None
@@ -155,18 +158,29 @@ class Player:
                         self._current_song = self._playlist.pop(0)
                     else:
                         self._current_song = None
-                if msg.startswith("adding:"):
+                elif msg.startswith("adding:"):
                     msg = msg[len("adding:"):]
                     song = Song.objects.get(id=msg)
                     self._queue(song)
+                elif msg.startswith("pos:"):
+                    msg = msg[len("pos:"):]
+                    self._current_song_time = float(msg)
 
     def get_list_song(self) -> List[Song]:
         self._proccess_msg_queue()
         return [song for song in self._playlist]
 
-    def get_current_song(self) -> Optional[Song]:
+    def get_current_song(self) -> Tuple[Optional[Song], timedelta]:
         self._proccess_msg_queue()
-        return self._current_song
+        if self._current_song is None:
+            return None, timedelta(milliseconds=0)
+        self._current_song_time = None
+        if self._queue_action:
+            self._queue_action.put("get_pos")
+        while self._current_song_time is None:
+            self._proccess_msg_queue()
+            time.sleep(0.01)
+        return self._current_song, timedelta(milliseconds=self._current_song_time)
 
     def get_paused(self) -> bool:
         self._proccess_msg_queue()
