@@ -92,6 +92,7 @@ class Player:
                     improvise = True
                 elif action == "improvise_false":
                     improvise = False
+                print("Improvise:", improvise)
             queue_process_msg.put("next")
 
     def queue(self, song: Song) -> None:
