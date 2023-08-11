@@ -31,7 +31,7 @@ class Player:
             self._process_started = True
             self._process = Process(
                 target=self._process_loop,
-                args=(self._queue_song, self._queue_action, self._queue_process_msg),
+                args=(self._queue_song, self._queue_action, self._queue_process_msg, self._improvise),
                 daemon=True,
             )
             self._process.start()
