@@ -103,6 +103,7 @@ def queue(request):
         "song_curr": current_song,
         "song_curr_id": str(current_song.id),
         "paused": PLAYER.get_paused(),
+        "improvised": PLAYER.get_improvise(),
     }
     return HttpResponse(template.render(context, request))
 
@@ -116,4 +117,8 @@ def resume_api(_):
 
 def skip_api(_):
     PLAYER.next()
+    return HttpResponseRedirect(reverse("songs:queue"))
+
+def improvise_api(_):
+    PLAYER.toggle_improvise()
     return HttpResponseRedirect(reverse("songs:queue"))

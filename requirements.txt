@@ -2,3 +2,5 @@ django
 yt-dlp
 pygame
 daphne
+ytmusicapi
+ytmusicapi

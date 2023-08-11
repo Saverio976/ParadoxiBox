@@ -4,8 +4,10 @@ from typing import List, Optional
 
 from django.dispatch import receiver
 from django.utils.autoreload import file_changed
+from django.conf import settings
 
 from .models import Song
+from .ytdl import get_next_related, download_song_ytdl, video_id_to_url
 
 
 class Player:
@@ -18,6 +20,7 @@ class Player:
         self._process: Optional[Process] = None
         self._process_started = False
         self._paused = False
+        self._improvise = False
 
     def _init_process(self) -> None:
         if self._process_started is False:
@@ -43,12 +46,25 @@ class Player:
         stop = False
         pygame.mixer.init()
         paused = False
+        last_played: Optional[Song] = None
         while stop is False:
             if queue_song.empty() is False:
                 song = queue_song.get()
                 filename = song.path_music.path
                 pygame.mixer.music.load(filename)
                 pygame.mixer.music.play()
+                last_played = song
+            elif self._improvise is True and last_played is not None:
+                try:
+                    videos_id_next = get_next_related(f"{last_played.artist} {last_played.title}", limit=1)
+                    url_next = video_id_to_url(videos_id_next[0])
+                    next_songs = download_song_ytdl(settings.MEDIA_ROOT / 'song', url_next, True)
+                    for song in next_songs or []:
+                        queue_song.put(song)
+                except Exception as esc:
+                    print(esc)
+                    last_played = None
+                    continue
             else:
                 time.sleep(0.1)
                 continue
@@ -134,6 +150,12 @@ class Player:
     def get_paused(self) -> bool:
         self._proccess_msg_queue()
         return self._paused
+
+    def toggle_improvise(self) -> None:
+        self._improvise = not self._improvise
+
+    def get_improvise(self) -> bool:
+        return self._improvise
 
 
 PLAYER = Player()

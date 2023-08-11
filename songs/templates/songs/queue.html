@@ -18,10 +18,13 @@ window.setTimeout(function() {
 {% block content %}
 
 <p>Paused: {{ paused }}</p>
+<\br>
+<p>Auto Related Next: {{ improvised }}</p>
 
 <a href="{% url 'songs:pause_api' %}">⏸️</a>
 <a href="{% url 'songs:resume_api' %}">▶️</a>
 <a href="{% url 'songs:skip_api' %}">⏭️</a>
+<a href="{% url 'songs:improvise_api' %}">🎲/a>
 
 <p>Curently Playing: <a href="{% url 'songs:song' song_curr_id %}">{{ song_curr.artist }} - {{ song_curr.title }}</p>
 

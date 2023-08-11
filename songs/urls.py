@@ -13,6 +13,7 @@ urlpatterns = [
     path("api/pause", views.pause_api, name="pause_api"),
     path("api/resume", views.resume_api, name="resume_api"),
     path("api/skip", views.skip_api, name="skip_api"),
+    path("api/improvise", views.improvise_api, name="improvise_api"),
     path("song/<song_id>", views.song, name="song"),
     path("media/songs/<path>", views.download_song, name="media_songs"),
     path("queue/add/<song_id>", views.queue_add_song_api, name="queue_song_api"),
