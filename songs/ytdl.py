@@ -41,11 +41,14 @@ def download_song_ytdl(home_path: str, search: str, noplaylist: bool = False):
         },
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        infos = ydl.extract_info(f"{search}", download=True)
+        datas = ydl.extract_info(f"{search}", download=True)
     if not infos:
         return None
+    infos = {"entries": []}
     if noplaylist:
-        infos["entries"] = infos["entries"][:1]
+        infos["entries"] = [datas]
+    else:
+        infos["entries"] = datas["entries"]
     saved = []
     for entry in infos["entries"]:
         source_link = entry["webpage_url"]
