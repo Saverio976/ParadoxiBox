@@ -70,3 +70,6 @@ service-disable:
 
 service-fclean:
 	rm -f "${TARGET_SERVICE_PATH}"
+
+service-restart:
+	systemctl --user restart paradoxibox.service
