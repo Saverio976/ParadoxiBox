@@ -1,5 +1,9 @@
 # ParadoxiBox
 
+A Music Player on a Server with web controller
+
+- Tested on a Raspberry Pi 3B+ (need to install rust [rust install](https://www.rust-lang.org/tools/install) for one python dependcy)
+
 Work In Progress
 
 Available now:
