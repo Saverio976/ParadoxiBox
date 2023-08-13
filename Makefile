@@ -60,6 +60,7 @@ service-setup:
 	SECRET_KEY="${SECRET_KEY}"				\
 	HOST="${HOST}"							\
 	PORT="${PORT}"							\
+	PYTHON="${PYTHON}"					\
 		envsubst < ./paradoxibox.service > "${TARGET_SERVICE_PATH}"
 
 service-enable:
