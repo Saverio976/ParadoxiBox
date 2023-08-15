@@ -142,6 +142,11 @@ class Player:
     def get_improvise(self) -> bool:
         return self._improvise
 
+    def improvise_now(self) -> None:
+        self._proccess_msg_queue()
+        if self._queue_action:
+            self._queue_action.put("improvise")
+
 
 PLAYER = Player()
 

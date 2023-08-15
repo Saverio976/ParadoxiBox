@@ -129,7 +129,17 @@ def improvise_api(_):
     return HttpResponseRedirect(reverse("songs:queue"))
 
 
+def improvise_now_api(_):
+    PLAYER.improvise_now()
+    return HttpResponseRedirect(reverse("songs:queue"))
+
+
 def library_used(request: HttpRequest):
     template = loader.get_template("songs/library_used.html")
     context = {}
     return HttpResponse(template.render(context, request))
+
+
+def stop_api(_):
+    PLAYER.stop()
+    return HttpResponseRedirect(reverse("songs:index"))
