@@ -140,4 +140,5 @@ class PlayerDaemon:
             self.__on_next()
 
     def __call__(self) -> None:
+        pygame.mixer.init()
         self.__loop()
