@@ -71,7 +71,7 @@ class PlayerDaemon:
             return False
 
     def __on_play(self) -> None:
-        if self._improvise and self._last_song:
+        if self._improvise and self._last_song and self._queue_song.empty():
             duration_threshold: timedelta = self._last_song.duration - timedelta(
                 seconds=4
             )
