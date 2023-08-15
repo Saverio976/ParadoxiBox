@@ -1,8 +1,7 @@
 from pathlib import Path
-from threading import Thread
 
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 from django.views.static import serve
@@ -12,28 +11,28 @@ from .player import PLAYER
 from .song_download_helper import download_song_helper
 
 
-def index(request):
+def index(request: HttpRequest):
     template = loader.get_template("songs/index.html")
     context = {}
     return HttpResponse(template.render(context, request))
 
 
-def downloaded_songs(request):
+def downloaded_songs(request: HttpRequest):
     all_songs = Song.objects.all()
     template = loader.get_template("songs/downloaded_songs.html")
     context = {"songs": all_songs}
     return HttpResponse(template.render(context, request))
 
 
-def song(request, song_id):
+def song(request: HttpRequest, song_id: str):
     song = Song.objects.get(id=song_id)
     template = loader.get_template("songs/song.html")
     context = {"song": song, "song_id": song_id}
     return HttpResponse(template.render(context, request))
 
 
-def new_song_api_search(request):
-    search = request.POST["search"]
+def new_song_api_search(request: HttpRequest):
+    search = str(request.POST["search"])
     to_queue = True if request.POST.get("to_queue", False) else False
     download_song_helper(
         f"ytsearch:{search}",
@@ -46,7 +45,7 @@ def new_song_api_search(request):
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
 
-def new_song_api_url(request):
+def new_song_api_url(request: HttpRequest):
     url = request.POST["url"]
     to_queue = True if request.POST.get("to_queue", False) else False
     download_song_helper(
@@ -60,7 +59,7 @@ def new_song_api_url(request):
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
 
-def new_song_api_url_playlist(request):
+def new_song_api_url_playlist(request: HttpRequest):
     url = request.POST["url"]
     to_queue = True if request.POST.get("to_queue", False) else False
     download_song_helper(
@@ -74,24 +73,24 @@ def new_song_api_url_playlist(request):
     return HttpResponseRedirect(reverse("songs:downloaded_songs"))
 
 
-def new_song(request):
+def new_song(request: HttpRequest):
     template = loader.get_template("songs/new_song.html")
     context = {}
     return HttpResponse(template.render(context, request))
 
 
-def download_song(request, path):
+def download_song(request: HttpRequest, path: str):
     path_song = Path("songs") / path
     return serve(request, path_song, document_root=settings.MEDIA_ROOT)
 
 
-def queue_add_song_api(_, song_id):
+def queue_add_song_api(_, song_id: str):
     song = Song.objects.get(id=song_id)
     PLAYER.queue(song)
     return HttpResponseRedirect(reverse("songs:queue"))
 
 
-def queue(request):
+def queue(request: HttpRequest):
     playlist = PLAYER.get_list_song()
     current_song, timed = PLAYER.get_current_song()
     if current_song is None:
@@ -130,7 +129,7 @@ def improvise_api(_):
     return HttpResponseRedirect(reverse("songs:queue"))
 
 
-def library_used(request):
+def library_used(request: HttpRequest):
     template = loader.get_template("songs/library_used.html")
     context = {}
     return HttpResponse(template.render(context, request))

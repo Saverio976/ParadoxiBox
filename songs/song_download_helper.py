@@ -3,8 +3,8 @@ from typing import Any, Callable
 
 from django.conf import settings
 
-from .models import Song
-from .ytdl import download_song_ytdl
+from songs.models import Song
+from songs.ytdl import download_song_ytdl
 
 
 def _download_song_helper(
