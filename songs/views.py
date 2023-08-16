@@ -143,3 +143,11 @@ def library_used(request: HttpRequest):
 def stop_api(_):
     PLAYER.stop()
     return HttpResponseRedirect(reverse("songs:index"))
+
+def set_volume_api(_, volume: int):
+    """
+    volume: int
+        between 0 and 100
+    """
+    PLAYER.set_volume(volume)
+    return HttpResponseRedirect(reverse("songs:queue"))

@@ -118,6 +118,12 @@ class PlayerDaemon:
             ).start()
         elif action == "get_pos":
             self._queue_process_msg.put("pos:" + str(self.get_pos().total_seconds()))
+        elif action.startswith("set_volume:"):
+            volume = int(action[len("set_volume:") :])
+            pygame.mixer.music.set_volume(volume / 100.0)
+        elif action == "get_volume":
+            volume = int(pygame.mixer.music.get_volume() * 100)
+            self._queue_process_msg.put(f"volume:{volume}")
 
     def __on_next(self) -> None:
         self._queue_process_msg.put("next")

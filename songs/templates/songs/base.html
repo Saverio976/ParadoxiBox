@@ -10,7 +10,7 @@
 
 <body>
     <script>
-        {% block script %}{% endblock %}
+        {% block script_start %}{% endblock %}
     </script>
     <div id="sidebar">
         <h1>ParadoxiBox - {% block headerTitle %}{% endblock %}</h1>
@@ -28,5 +28,8 @@
     <div id="content">
         {% block content %}{% endblock %}
     </div>
+    <script>
+        {% block script_end %}{% endblock %}
+    </script>
 </body>
 </html>

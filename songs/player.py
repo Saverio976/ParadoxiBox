@@ -11,6 +11,7 @@ from .logger import logger_print
 from .models import Song
 
 DEFAULT_NUMBER_IMPROVISE = 2
+DEFAULT_VOLUME = 50
 
 
 class Player:
@@ -27,6 +28,7 @@ class Player:
         self._paused = False
         self._improvise = False
         self._locker = Lock()
+        self._volume = DEFAULT_VOLUME
 
     def _init_process(self) -> None:
         if self._process_started is False:
@@ -36,6 +38,7 @@ class Player:
             self._queue_song = Queue()
             self._queue_action = Queue()
             self._queue_process_msg = Queue()
+            self._queue_action.put(f"set_volume:{self._volume}")
             self._process_started = True
             player_daemon = PlayerDaemon(
                 queue_song=self._queue_song,
@@ -111,6 +114,8 @@ class Player:
                         self.queue(Song.objects.get(id=msg))
                     except:
                         pass
+                elif msg.startswith("volume:"):
+                    self._volume = int(msg[len("volume:") :])
 
     def get_list_song(self) -> List[Song]:
         self._proccess_msg_queue()
@@ -146,6 +151,26 @@ class Player:
         self._proccess_msg_queue()
         if self._queue_action:
             self._queue_action.put("improvise")
+
+    def get_volume(self) -> int:
+        """
+        Get the current volume between 0 and 100
+        """
+        self._proccess_msg_queue()
+        if self._queue_action:
+            self._queue_action.put("get_volume")
+        time.sleep(0.15)
+        self._proccess_msg_queue()
+        return self._volume
+
+    def set_volume(self, volume: int) -> None:
+        """
+        Set the current volume between 0 and 100
+        """
+        volume = max(0, min(volume, 100))
+        self._proccess_msg_queue()
+        if self._queue_action:
+            self._queue_action.put(f"set_volume:{volume}")
 
 
 PLAYER = Player()
