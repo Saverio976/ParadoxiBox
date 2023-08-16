@@ -6,6 +6,7 @@ TIME_ZONE				?=		Europe/Paris
 SECRET_KEY				?=		django-secret-key-wow-so-random0123456789
 PACKAGE					?=
 PYTHON					?=		python
+COMMAND					?=
 
 TARGET_SERVICE_PATH		=		/etc/systemd/user/paradoxibox.service
 
@@ -36,6 +37,9 @@ makemigrations:
 shell:
 	. ./.venv/bin/activate && ./manage.py shell
 
+managepy:
+	. ./.venv/bin/activate && ./manage.py ${COMMAND}
+
 createsuperuser:
 	. ./.venv/bin/activate && ./manage.py createsuperuser
 
@@ -49,6 +53,9 @@ pip-install:
 	. ./.venv/bin/activate && pip install -U pip
 	. ./.venv/bin/activate && pip install -U wheel
 	. ./.venv/bin/activate && pip install -r requirements.txt
+
+pip-install-dev: pip-install
+	. ./.venv/bin/activate && pip install -r requirements-dev.txt
 
 install: pip-install migrate
 

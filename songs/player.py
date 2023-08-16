@@ -2,7 +2,7 @@ import time
 from datetime import timedelta
 from multiprocessing import Process, Queue
 from threading import Lock
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 from django.dispatch import receiver
 from django.utils.autoreload import file_changed
@@ -151,7 +151,8 @@ class Player:
 PLAYER = Player()
 
 
-@receiver(file_changed)
-def on_file_changed(sender, **kwargs):
+@receiver(file_changed, dispatch_uid="on_file_changed_player_stop")
+def on_file_changed(sender: Any, **kwargs: Any):
+    del sender, kwargs
     PLAYER.stop()
     return False

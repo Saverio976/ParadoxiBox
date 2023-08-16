@@ -81,7 +81,7 @@ def new_song(request: HttpRequest):
 
 def download_song(request: HttpRequest, path: str):
     path_song = Path("songs") / path
-    return serve(request, path_song, document_root=settings.MEDIA_ROOT)
+    return serve(request, str(path_song), document_root=settings.MEDIA_ROOT)
 
 
 def queue_add_song_api(_, song_id: str):

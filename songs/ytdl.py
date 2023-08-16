@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import yt_dlp
 from ytmusicapi.ytmusic import YTMusic
@@ -55,14 +55,18 @@ def download_song_ytdl(
         datas = ydl.extract_info(f"{search}", download=True)
     if not datas:
         return None
-    infos = {"entries": []}
+    infos: Dict[str, List[Any]] = {"entries": []}
     if noplaylist:
         if "entries" in datas.keys():
-            infos["entries"] = datas["entries"][:1]
+            entries = datas["entries"][:1]
+            if isinstance(entries, list):
+                infos["entries"] = entries
         else:
             infos["entries"] = [datas]
     else:
-        infos["entries"] = datas["entries"]
+        entries = datas["entries"]
+        if isinstance(entries, list):
+            infos["entries"] = entries
     saved = []
     for entry in infos["entries"]:
         source_link = entry["webpage_url"]

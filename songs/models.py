@@ -13,6 +13,7 @@ class Song(models.Model):
     path_music = models.FileField(upload_to="songs/")
     duration = models.DurationField()
     thumbnail = models.URLField(max_length=500)
+    date_used = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.artist} - {self.title} ({self.duration})"
