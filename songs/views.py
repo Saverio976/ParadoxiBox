@@ -151,3 +151,7 @@ def set_volume_api(_, volume: int):
     """
     PLAYER.set_volume(volume)
     return HttpResponseRedirect(reverse("songs:queue"))
+
+def get_volume_api(_):
+    volume = PLAYER.get_volume()
+    return HttpResponse(f"{volume}")
