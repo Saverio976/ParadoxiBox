@@ -93,18 +93,16 @@ def queue_add_song_api(_, song_id: str):
 def queue(request: HttpRequest):
     playlist = PLAYER.get_list_song()
     current_song, timed = PLAYER.get_current_song()
-    if current_song is None:
-        template = loader.get_template("songs/queue_empty.html")
-        context = {}
-        return HttpResponse(template.render(context, request))
-    template = loader.get_template("songs/queue.html")
+    template_path = "songs/queue_empty.html" if current_song is None else "songs/queue.html"
+    template = loader.get_template(template_path)
     context = {
         "playlists": playlist,
         "song_curr": current_song,
-        "song_curr_id": str(current_song.id),
+        "song_curr_id": None if current_song is None else str(current_song.id),
         "song_curr_timed": timed,
         "paused": PLAYER.get_paused(),
         "improvised": PLAYER.get_improvise(),
+        "volume": PLAYER.get_volume(),
     }
     return HttpResponse(template.render(context, request))
 

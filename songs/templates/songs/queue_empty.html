@@ -12,9 +12,33 @@ window.setTimeout(function() {
 }, 5000);
 {% endblock %}
 
+{% block style %}
+.disabled {
+  pointer-events: none;
+  cursor: default;
+}
+{% endblock %}
+
 {% block title %}Queue{% endblock %}
 {% block headerTitle %}Queue{% endblock %}
 
 {% block content %}
-<p>No Songs in the Queue</p>
+<p>Paused: {{ paused }}</p>
+
+<p>Auto Related Next: {{ improvised }} | <a href="{% url 'songs:improvise_api' %}">Toggle</a></p>
+
+<p><a href="{% url 'songs:improvise_now_api' %}" class="disabled">Add related song (disabled when no songs playing)</a></p>
+
+{% if paused %}
+<a href="{% url 'songs:resume_api' %}">▶️ </a>
+{% else %}
+<a href="{% url 'songs:pause_api' %}">⏸️ </a>
+{% endif %}
+<a href="{% url 'songs:skip_api' %}" class="disabled">⏭️ </a>
+
+<div class="slidecontainer">
+  <input type="range" min="0" max="100" value="{{ volume }}" class="slider" id="myRange">
+</div>
+
+<p>Curently Playing: No Songs in the Queue</p>
 {% endblock %}

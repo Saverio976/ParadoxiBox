@@ -68,7 +68,7 @@ window.setTimeout(function() {
 <a href="{% url 'songs:skip_api' %}">⏭️ </a>
 
 <div class="slidecontainer">
-    <input type="range" min="0" max="100" value="50" class="slider" id="myRange">
+  <input type="range" min="0" max="100" value="{{ volume }}" class="slider" id="myRange">
 </div>
 
 
@@ -80,16 +80,6 @@ window.setTimeout(function() {
 {% endblock %}
 
 {% block script_end %}
-const xhrInit = new XMLHttpRequest();
-xhrInit.onload = function(e) {
-    var slider = document.getElementById("myRange");
-    slider.value = parseInt(xhrInit.response, 10);
-};
-xhrInit.open("GET", "{% url 'songs:get_volume_api' %}");
-xhrInit.send();
-</script>
-
-<script>
 var slider = document.getElementById("myRange");
 slider.oninput = function() {
     const xhr = new XMLHttpRequest();
