@@ -4,3 +4,4 @@ pygame
 daphne
 ytmusicapi
 django-cleanup
+Twisted[tls,http2]
