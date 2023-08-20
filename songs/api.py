@@ -64,7 +64,7 @@ def get_current(_):
 def next(_):
     PLAYER.next()
 
-@api.get("/queue/current/pos", response=CurrentSongPosPercent)
+@api.get("/queue/current/pos/set", response=CurrentSongPosPercent)
 def set_current_pos(_, pos: int):
     """
     pos: int
@@ -160,7 +160,7 @@ def improvise_auto():
 def get_volume(_):
     return {"volume": PLAYER.get_volume()}
 
-@api.get("/volume", response=VolumeStatusSchema)
+@api.get("/volume/set", response=VolumeStatusSchema)
 def set_volume(_, volume: int):
     """
     volume: int
