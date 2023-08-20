@@ -128,6 +128,10 @@ def pause_false(_):
 def is_paused(_):
     return {"paused": PLAYER.get_paused()}
 
+@api.get("/stop")
+def stop(_):
+    PLAYER.stop()
+
 # IMPROVISE
 
 @api.get("/improvise/now")
