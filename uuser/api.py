@@ -11,6 +11,9 @@ class LoginSchema(Schema):
 class CreateUserSchema(Schema):
     status: Literal["created", "error"]
 
+class DeleteUserSchema(Schema):
+    deleted: bool
+
 class AuthBearer(HttpBearer):
     def authenticate(self, request, token):
         if UUser.is_connected(token):
@@ -39,3 +42,8 @@ def login(_, email: str, password: str):
 @router.get("/logout", auth=AuthBearer())
 def logout(request):
     UUser.disconnect(request.auth)
+
+@router.get("/delete", auth=AuthBearer())
+def delete(request):
+    deleted = UUser.delete_with_bearer(request.auth)
+    return {"deleted": deleted}

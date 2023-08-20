@@ -6,8 +6,10 @@ import hashlib
 
 # Create your models here.
 
+LENGTH_BEARER = 32
+
 class UUser(models.Model):
-    bearer = models.CharField(max_length=24, blank=True, null=True, unique=True)
+    bearer = models.CharField(max_length=LENGTH_BEARER, blank=True, null=True, unique=True)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=255)
     password = models.CharField(max_length=512)
@@ -48,11 +50,11 @@ class UUser(models.Model):
             user = UUser.objects.get(email=email, password=password)
         except Exception:
             return None
-        user.bearer = secrets.token_urlsafe(24)
+        user.bearer = secrets.token_urlsafe(LENGTH_BEARER)
         try:
             user.save()
         except:
-            user.bearer = secrets.token_urlsafe(24)
+            user.bearer = secrets.token_urlsafe(LENGTH_BEARER)
             try:
                 user.save()
             except Exception:
@@ -69,3 +71,12 @@ class UUser(models.Model):
         user = UUser(email=email, username=username, password=password)
         user.save()
         return user
+
+    @staticmethod
+    def delete_with_bearer(bearer: str) -> bool:
+        try:
+            user = UUser.objects.get(bearer=bearer)
+            user.delete()
+        except:
+            return False
+        return True
