@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [os.getenv("ALLOWED_HOST", "127.0.0.1")]
 
 INSTALLED_APPS = [
     "songs.apps.SongsConfig",
+    "uuser.apps.UuserConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
