@@ -17,3 +17,14 @@ class Song(models.Model):
 
     def __str__(self):
         return f"{self.artist} - {self.title} ({self.duration})"
+
+    def to_json(self):
+        return {
+            "id": str(self.id),
+            "title": str(self.title),
+            "artist": str(self.artist),
+            "source_link": str(self.source_link),
+            "duration_second": self.duration.total_seconds(),
+            "thumbnail_url": str(self.thumbnail),
+            "file_url": str(self.path_music.url),
+        }

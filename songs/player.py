@@ -180,7 +180,7 @@ class Player:
         """
         return self._improvise
 
-    def improvise_now(self) -> None:
+    def improvise_now(self, n: int) -> None:
         """
         Improvise the n next song based on current song
         """
@@ -188,7 +188,7 @@ class Player:
             return
         self._proccess_msg_queue()
         if self._queue_action:
-            self._queue_action.put("improvise")
+            self._queue_action.put(f"improvise_{n}")
 
     def get_volume(self) -> int:
         """
