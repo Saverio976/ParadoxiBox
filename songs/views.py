@@ -93,6 +93,7 @@ def queue_add_song_api(_, song_id: str):
 def queue(request: HttpRequest):
     playlist = PLAYER.get_list_song()
     current_song, timed = PLAYER.get_current_song()
+    pos = PLAYER.get_song_time()
     template_path = "songs/queue_empty.html" if current_song is None else "songs/queue.html"
     template = loader.get_template(template_path)
     context = {
@@ -103,6 +104,7 @@ def queue(request: HttpRequest):
         "paused": PLAYER.get_paused(),
         "improvised": PLAYER.get_improvise(),
         "volume": PLAYER.get_volume(),
+        "pos": pos,
     }
     return HttpResponse(template.render(context, request))
 
@@ -153,3 +155,15 @@ def set_volume_api(_, volume: int):
 def get_volume_api(_):
     volume = PLAYER.get_volume()
     return HttpResponse(f"{volume}")
+
+def get_song_pos_api(_):
+    pos = PLAYER.get_song_time()
+    return HttpResponse(f"{pos}")
+
+def set_song_pos_api(_, pos: int):
+    """
+    pos: int
+        between 0 and 100
+    """
+    PLAYER.set_song_time(pos)
+    return HttpResponseRedirect(reverse("songs:queue"))

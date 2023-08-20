@@ -30,6 +30,7 @@ class PlayerDaemon:
         self._paused = False
         self._last_song: Optional[Song] = None
         self._default_number_improvise = default_number_improvise
+        self._improvised_auto = False
 
     def __play_next(self) -> Optional[Song]:
         song = self._queue_song.get()
@@ -40,6 +41,7 @@ class PlayerDaemon:
             logger_print(f"Error loading {filename} {esc}")
             return None
         pygame.mixer.music.play()
+        self._improvised_auto = False
         return song
 
     def get_pos(self) -> timedelta:
@@ -71,7 +73,7 @@ class PlayerDaemon:
             return False
 
     def __on_play(self) -> None:
-        if self._improvise and self._last_song and self._queue_song.empty():
+        if self._improvise and self._last_song and self._queue_song.empty() and self._improvised_auto is False:
             duration_threshold: timedelta = self._last_song.duration - timedelta(
                 seconds=4
             )
@@ -84,7 +86,7 @@ class PlayerDaemon:
                         self._default_number_improvise,
                     ),
                 ).start()
-                self._last_song = None
+                self._improvised_auto = True
 
     def __react_event(self) -> None:
         if self._queue_action.empty():
@@ -124,6 +126,11 @@ class PlayerDaemon:
         elif action == "get_volume":
             volume = int(pygame.mixer.music.get_volume() * 100)
             self._queue_process_msg.put(f"volume:{volume}")
+        elif action.startswith("set_pos:") and self._last_song is not None:
+            pos = int(action[len("set_pos:") :])
+            pos_second = self._last_song.duration.total_seconds() * (pos / 100.0)
+            pygame.mixer.music.rewind()
+            pygame.mixer.music.set_pos(pos_second)
 
     def __on_next(self) -> None:
         self._queue_process_msg.put("next")

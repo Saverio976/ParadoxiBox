@@ -68,11 +68,20 @@ window.setTimeout(function() {
 <a href="{% url 'songs:skip_api' %}">⏭️ </a>
 
 <div class="slidecontainer">
-  <input type="range" min="0" max="100" value="{{ volume }}" class="slider" id="myRange">
+  <input type="range" min="0" max="100" value="{{ volume }}" class="slider" id="RangeVolume">
 </div>
 
 
-<p>Curently Playing: <a href="{% url 'songs:song' song_curr_id %}">{{ song_curr }}</a> [listened {{ song_curr_timed }}]</p>
+<p>Curently Playing: <a href="{% url 'songs:song' song_curr_id %}">{{ song_curr.artist }} <=> {{ song_curr.title }}</a></p>
+
+<div class="slidecontainer">
+  <p>
+    00:00:00
+    <input type="range" min="0" max="100" value="{{ pos }}" class="slider" id="RangePos" list="values" />
+    {{ song_curr_timed }}
+  </p>
+</div>
+<p>Current Position: <output id="valuePos"></output>%</p>
 
 {% for song in playlists %}
     <li><a href="{% url 'songs:song' song.id %}"> {{ song }} </a></li>
@@ -80,11 +89,24 @@ window.setTimeout(function() {
 {% endblock %}
 
 {% block script_end %}
-var slider = document.getElementById("myRange");
+var slider = document.getElementById("RangeVolume");
 slider.oninput = function() {
     const xhr = new XMLHttpRequest();
     const url_mask = "{% url 'songs:set_volume_api' 12345 %}".replace(/12345/, this.value.toString());
     xhr.open("GET", url_mask);
     xhr.send();
+};
+</script>
+
+<script>
+var slider = document.getElementById("RangePos");
+const value = document.querySelector("#valuePos");
+value.textContent = slider.value;
+slider.oninput = function() {
+    const xhr = new XMLHttpRequest();
+    const url_mask = "{% url 'songs:set_song_pos_api' 12345 %}".replace(/12345/, this.value.toString());
+    xhr.open("GET", url_mask);
+    xhr.send();
+    value.textContent = this.value.toString();
 };
 {% endblock %}
