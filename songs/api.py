@@ -20,7 +20,10 @@ class CurrentSongSchema(Schema):
     song_pos: Optional[float] = None
 
 class CurrentSongPosPercent(Schema):
-    pos: Optional[int] = None
+    pos: Optional[int] = None # between 0 and 100
+    """
+    between 0 and 100
+    """
 
 class QueueAddSchema(Schema):
     status: Literal["downloading", "added", "error"]
@@ -33,6 +36,9 @@ class AutoImproviseStatusSchema(Schema):
 
 class VolumeStatusSchema(Schema):
     volume: int
+    """
+    between 0 and 100
+    """
 
 # QUEUE / CURRENT
 
@@ -60,6 +66,11 @@ def next(_):
 
 @api.get("/queue/current/pos", response=CurrentSongPosPercent)
 def set_current_pos(_, pos: int):
+    """
+    pos: int
+        between 0 and 100
+    """
+    pos = max(0, min(100, pos))
     if PLAYER.get_current_song()[0] is None:
         return {"pos": None}
     PLAYER.set_song_time(pos)
@@ -70,10 +81,6 @@ def get_current_pos(_):
     if PLAYER.get_current_song()[0] is None:
         return {"pos": None}
     return {"pos": PLAYER.get_song_time()}
-
-@api.get("/queue/stop")
-def stop(_):
-    PLAYER.stop()
 
 @api.get("/queue/add/song/url", response=QueueAddSchema)
 def add_song_url(_, url: str):
@@ -114,7 +121,7 @@ def add_playlist_url(_, url: str):
     )
     return {"status": "downloading"}
 
-# PAUSE / RESUME
+# PAUSE / RESUME /STOP
 
 @api.get("/pause")
 def pause_true(_):
@@ -155,5 +162,10 @@ def get_volume(_):
 
 @api.get("/volume", response=VolumeStatusSchema)
 def set_volume(_, volume: int):
+    """
+    volume: int
+        between 0 and 100
+    """
+    volume = max(0, min(100, volume))
     PLAYER.set_volume(volume)
     return {"volume": PLAYER.get_volume()}
