@@ -5,3 +5,4 @@ daphne
 ytmusicapi
 django-cleanup
 Twisted[tls,http2]
+django-ninja
