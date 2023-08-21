@@ -22,9 +22,10 @@ RUN apt-get update                  \
         python3-pygame              \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > install_rust.sh
-RUN chmod +x install_rust.sh
-RUN install_rust.sh -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > ./install_rust.sh
+RUN chmod +x ./install_rust.sh
+RUN ./install_rust.sh -y
+RUN rm ./install_rust.sh
 
 WORKDIR /app
 
