@@ -20,6 +20,7 @@ RUN apt-get update                  \
         python3-dev                 \
         python3-numpy               \
         python3-pygame              \
+	libssl-dev                  \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > ./install_rust.sh
