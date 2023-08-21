@@ -4,11 +4,15 @@ RUN apt-get update                  \
     && apt-get install              \
         --no-install-recommends     \
         -y                          \
+        libsdl2-dev                 \
+        libsdl2-image-dev           \
+        libsdl2-mixer-dev           \
+        libsdl2-ttf-dev             \
+        libfreetype6-dev            \
+        libportmidi-dev             \
+        libjpeg-dev                 \
         ffmpeg                      \
         make                        \
-        libsdl2-dev                 \
-        libsdl2-mixer-dev           \
-        freetype2                   \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
