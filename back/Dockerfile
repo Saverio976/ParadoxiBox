@@ -26,6 +26,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > ./install_rust.s
 RUN chmod +x ./install_rust.sh
 RUN ./install_rust.sh -y
 RUN rm ./install_rust.sh
+ENV PATH="${PATH}:/root/.cargo/bin"
 
 WORKDIR /app
 
