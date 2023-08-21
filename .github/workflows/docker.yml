@@ -38,6 +38,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      - name: remove pygame from deps
+        run: sed -i 's/pygame//g' back/requirements.txt
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
