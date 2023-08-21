@@ -13,6 +13,7 @@ RUN apt-get update                  \
         libjpeg-dev                 \
         ffmpeg                      \
         make                        \
+        gcc                         \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
