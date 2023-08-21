@@ -12,6 +12,7 @@ RUN make pip-install
 COPY manage.py /app/manage.py
 COPY ParadoxiBox /app/ParadoxiBox
 COPY songs /app/songs
+copy uuser /app/uuser
 
 RUN make migrate
 
