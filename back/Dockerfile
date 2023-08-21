@@ -1,6 +1,15 @@
 FROM python:3.11-slim
 
-RUN apt-get update && apt-get install -y ffmpeg make libsdl2-dev libsdl2-mixer-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update                  \
+    && apt-get install              \
+        --no-install-recommends     \
+        -y                          \
+        ffmpeg                      \
+        make                        \
+        libsdl2-dev                 \
+        libsdl2-mixer-dev           \
+        freetype2                   \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
