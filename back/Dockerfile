@@ -14,7 +14,10 @@ RUN apt-get update                  \
         ffmpeg                      \
         make                        \
         gcc                         \
-        python-pygame               \
+        python3-setuptools          \
+        python3-dev                 \
+        python3-numpy               \
+        python3-pygame              \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
