@@ -14,6 +14,7 @@ RUN apt-get update                  \
         ffmpeg                      \
         make                        \
         gcc                         \
+        g++                         \
         python3-setuptools          \
         python3-dev                 \
         python3-numpy               \
