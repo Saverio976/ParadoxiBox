@@ -1,11 +1,22 @@
 from typing import List, Optional
+
+import orjson
 from ninja import NinjaAPI, Schema
+from ninja.renderers import BaseRenderer
+
+from ParadoxiBox import __version__
 from songs.api import router as router_songs
 from uuser.api import router as router_uuser
 
-from ParadoxiBox import __version__
 
-api = NinjaAPI(title="ParadoxiBox")
+class ORJSONRenderer(BaseRenderer):
+    media_type = "application/json"
+
+    def render(self, request, data, *, response_status):
+        return orjson.dumps(data)
+
+
+api = NinjaAPI(title="ParadoxiBox", renderer=ORJSONRenderer())
 api.add_router("/songs/", router_songs)
 api.add_router("/auth/", router_uuser)
 
@@ -21,6 +32,7 @@ class CreditSchema(Schema):
     s: str
     link: str
 
+
 class CreditsSchema(Schema):
     credits: List[CreditSchema]
 
@@ -29,6 +41,7 @@ class CreditsSchema(Schema):
 def index_page(_):
     return {"welcome": "Welcome to ParadoxiBox"}
 
+
 @api.get("/credits", response=CreditsSchema)
 def credits(_):
     return {
@@ -36,52 +49,44 @@ def credits(_):
             {
                 "type": "python module",
                 "s": "django",
-                "link": "https://www.djangoproject.com/"
+                "link": "https://www.djangoproject.com/",
             },
             {
                 "type": "python module",
                 "s": "yt-dlp",
-                "link": "https://github.com/yt-dlp/yt-dlp"
+                "link": "https://github.com/yt-dlp/yt-dlp",
             },
-            {
-                "type": "python module",
-                "s": "pygame",
-                "link": "https://www.pygame.org/"
-            },
+            {"type": "python module", "s": "pygame", "link": "https://www.pygame.org/"},
             {
                 "type": "python module",
                 "s": "daphne",
-                "link": "https://github.com/django/daphne"
+                "link": "https://github.com/django/daphne",
             },
             {
                 "type": "python module",
                 "s": "ytmusicapi",
-                "link": "https://ytmusicapi.readthedocs.io"
+                "link": "https://ytmusicapi.readthedocs.io",
             },
             {
                 "type": "python module",
                 "s": "django-cleanup",
-                "link": "https://github.com/un1t/django-cleanup"
+                "link": "https://github.com/un1t/django-cleanup",
             },
-            {
-                "type": "python module",
-                "s": "twisted",
-                "link": "https://twisted.org/"
-            },
+            {"type": "python module", "s": "twisted", "link": "https://twisted.org/"},
             {
                 "type": "python module",
                 "s": "django-ninja",
-                "link": "https://django-ninja.rest-framework.com/"
+                "link": "https://django-ninja.rest-framework.com/",
             },
             {
                 "type": "contributor",
                 "s": "KitetsuK",
-                "link": "https://github.com/KitetsuK/"
+                "link": "https://github.com/KitetsuK/",
             },
             {
                 "type": "contributor",
                 "s": "Saverio976",
-                "link": "https://github.com/Saverio976/"
+                "link": "https://github.com/Saverio976/",
             },
         ]
     }
