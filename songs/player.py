@@ -237,6 +237,9 @@ class Player:
         percent = self._current_song_time.total_seconds() * 100 / self._current_song.duration.total_seconds()
         return percent
 
+    def process_events(self):
+        self._proccess_msg_queue()
+
 
 PLAYER = Player()
 

@@ -170,3 +170,7 @@ def set_volume(_, volume: int):
     volume = max(0, min(100, volume))
     PLAYER.set_volume(volume)
     return {"volume": PLAYER.get_volume()}
+
+@router.get("/process-events")
+def process_events(_):
+    PLAYER.process_events()

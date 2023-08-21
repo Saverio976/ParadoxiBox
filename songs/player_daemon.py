@@ -109,13 +109,14 @@ class PlayerDaemon:
             self._improvise = True
         elif action == "improvise_false":
             self._improvise = False
-        elif action == "improvise":
+        elif action.startswith("improvise_"):
+            nb_improvise = int(action[len("improvise_") :])
             Thread(
                 target=self.improvise,
                 args=(
                     self._queue_process_msg,
                     self._last_song,
-                    self._default_number_improvise,
+                    nb_improvise,
                 ),
             ).start()
         elif action == "get_pos":
