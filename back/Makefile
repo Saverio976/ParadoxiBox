@@ -51,7 +51,7 @@ pip-install:
 		echo "${PACKAGE}" >> requirements.txt; \
 	fi
 	if [ ! -d "./.venv" ]; then \
-		${PYTHON} -m venv ./.venv; \
+		${PYTHON} -m venv --system-site-packages ./.venv; \
 	fi
 	. ./.venv/bin/activate && pip install -U pip
 	. ./.venv/bin/activate && pip install -U wheel

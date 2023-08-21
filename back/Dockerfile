@@ -14,6 +14,7 @@ RUN apt-get update                  \
         ffmpeg                      \
         make                        \
         gcc                         \
+        python-pygame               \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
