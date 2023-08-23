@@ -35,7 +35,7 @@ class Player:
         Initialize the process (player daemon)
         """
         if self._process_started is False:
-            from songs.player_daemon import PlayerDaemon
+            from songs.PlayerDaemon import PlayerDaemon
 
             logger_print("Starting process")
             self._queue_song = Queue()
@@ -43,7 +43,7 @@ class Player:
             self._queue_process_msg = Queue()
             self._queue_action.put(f"set_volume:{self._volume}")
             self._process_started = True
-            player_daemon = PlayerDaemon(
+            player_daemon = PlayerDaemon.PlayerDaemon(
                 queue_song=self._queue_song,
                 queue_action=self._queue_action,
                 queue_process_msg=self._queue_process_msg,

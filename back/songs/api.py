@@ -47,12 +47,12 @@ class VolumeStatusSchema(Schema):
 def get_queue(_):
     cur_song, _ = PLAYER.get_current_song()
     if cur_song is None:
-        return {"queue": []}
+        return []
     values = [cur_song.to_json()] + [
         song.to_json()
         for song in PLAYER.get_list_song()
     ]
-    return {"queue": values}
+    return values
 
 @router.get("/queue/current", response=CurrentSongSchema)
 def get_current(_):
