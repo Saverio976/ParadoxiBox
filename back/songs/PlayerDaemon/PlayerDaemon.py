@@ -154,6 +154,8 @@ class PlayerDaemon:
             self.__on_next()
 
     def __call__(self) -> None:
-        from .musicplayer_pygame import MusicPlayerPygame
-        self._music_player = MusicPlayerPygame()
+        from .musicplayer_discordpy import MusicPlayerDiscordPy
+        self._music_player = MusicPlayerDiscordPy()
         self.__loop()
+        del self._music_player
+        self._music_player = MusicPlayer()

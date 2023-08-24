@@ -4,14 +4,15 @@ import pygame
 from datetime import timedelta
 from .musicplayer import MusicPlayer
 from mutagen.mp3 import MP3
+from django.conf import settings
 
 class MusicPlayerPygame(MusicPlayer):
-    def __init__(self) -> None:
+    def __init__(self, configPath: Path = settings.BASE_DIR / "musicplayer-pygame.json") -> None:
         """Suport only mp3 for now"""
+        super().__init__(configPath)
         pygame.mixer.init()
         self._paused = False
         self._cur_song = ""
-        super().__init__()
 
     def __del__(self):
         self.stop()
@@ -31,7 +32,7 @@ class MusicPlayerPygame(MusicPlayer):
     def play(self, filepath: Path) -> bool:
         pygame.mixer.music.stop()
         pygame.mixer.music.load(filepath)
-        self._cur_song = filepath.as_posix()
+        self._cur_song = str(filepath)
         pygame.mixer.music.play()
         if self._paused:
             pygame.mixer.music.pause()

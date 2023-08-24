@@ -1,8 +1,24 @@
+import orjson
 from pathlib import Path
 from typing import Optional
 
+from django.conf import settings
+from songs.logger import logger_print
+
 class MusicPlayer:
-    def __init__(self) -> None:
+    def __init__(self, configPath: Path = settings.BASE_DIR / "musicplayer.json") -> None:
+        """
+        configPath: Path
+            json file with some config for the music player backend
+        """
+        try:
+            with open(configPath, "r") as f:
+                self.conf_json = orjson.loads(f.read())
+        except OSError as esc:
+            self.conf_json = {}
+        except Exception as esc:
+            logger_print("ERROR: MusicPlayer:", esc)
+            self.conf_json = {}
         super().__init__()
 
     def has_song(self) -> bool:

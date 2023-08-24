@@ -8,3 +8,4 @@ Twisted[tls,http2]
 django-ninja
 orjson
 mutagen
+discord.py[voice]
