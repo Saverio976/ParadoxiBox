@@ -1,4 +1,5 @@
 from typing import Literal, Optional
+from django.conf import settings
 
 from ninja import Router, Schema
 from ninja.security import HttpBearer
@@ -21,9 +22,18 @@ class DeleteUserSchema(Schema):
 
 
 class AuthBearer(HttpBearer):
+    def __init__(self, django_secret: bool = False) -> None:
+        super().__init__()
+        self._django_secret = django_secret
+
     def authenticate(self, request, token):
+        if self._django_secret:
+            if token == settings.SECRET_KEY:
+                return token
+            return None
         if UUser.is_connected(token):
             return token
+        return None
 
 
 @router.get("/create", response=CreateUserSchema)

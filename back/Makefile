@@ -84,3 +84,7 @@ service-fclean:
 
 service-restart:
 	systemctl --user restart paradoxibox.service
+
+quit:
+	curl -L "${HOST}:${PORT}/api/quit" -H "Authorization: Bearer ${SECRET_KEY}"
+	ps -aux | grep "$$USER" | grep -v grep | grep "runserver-" | grep "make" | awk '{print "kill " $$2}' | sh

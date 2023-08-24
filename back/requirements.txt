@@ -9,3 +9,4 @@ django-ninja
 orjson
 mutagen
 discord.py[voice]
+requests
