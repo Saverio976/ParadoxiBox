@@ -1,7 +1,7 @@
-from pathlib import Path
 import time
 from datetime import timedelta
 from multiprocessing import Queue
+from pathlib import Path
 from threading import Thread
 from typing import Optional
 
@@ -11,6 +11,7 @@ from songs.song_download_helper import download_song_helper
 from songs.ytdl import get_next_related, video_id_to_url
 
 from .musicplayer import MusicPlayer
+
 
 class PlayerDaemon:
     def __init__(
@@ -77,7 +78,12 @@ class PlayerDaemon:
             return False
 
     def __on_play(self) -> None:
-        if self._improvise and self._last_song and self._queue_song.empty() and self._improvised_auto is False:
+        if (
+            self._improvise
+            and self._last_song
+            and self._queue_song.empty()
+            and self._improvised_auto is False
+        ):
             duration_threshold: timedelta = self._last_song.duration - timedelta(
                 seconds=4
             )
@@ -155,6 +161,7 @@ class PlayerDaemon:
 
     def __call__(self) -> None:
         from .musicplayer_discordpy import MusicPlayerDiscordPy
+
         self._music_player = MusicPlayerDiscordPy()
         self.__loop()
         del self._music_player

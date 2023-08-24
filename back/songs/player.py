@@ -238,7 +238,11 @@ class Player:
         while self._current_song_time is None:
             self._proccess_msg_queue()
             time.sleep(0.01)
-        percent = self._current_song_time.total_seconds() * 100 / self._current_song.duration.total_seconds()
+        percent = (
+            self._current_song_time.total_seconds()
+            * 100
+            / self._current_song.duration.total_seconds()
+        )
         return percent
 
     def process_events(self):
