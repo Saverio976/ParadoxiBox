@@ -50,8 +50,12 @@ class Player:
                 improvise=self._improvise,
                 default_number_improvise=DEFAULT_NUMBER_IMPROVISE,
             )
-            self._process = Process(target=player_daemon, daemon=True)
+            self._process = Process(target=player_daemon)
             self._process.start()
+
+    def __del__(self):
+        if self._process:
+            self._process.kill()
 
     def queue(self, song: Song) -> None:
         """

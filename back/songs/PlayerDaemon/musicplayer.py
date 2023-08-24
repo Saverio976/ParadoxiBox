@@ -69,11 +69,11 @@ class MusicPlayer:
         """
         return False
 
-    def set_pause(self, paused: bool):
+    def set_pause(self, paused: bool) -> bool:
         """
         Set status of pause
         """
-        raise NotImplementedError
+        return False
 
     def get_vol(self) -> Optional[float]:
         """

@@ -68,6 +68,7 @@ class MusicPlayerPygame(MusicPlayer):
             pygame.mixer.music.pause()
         else:
             pygame.mixer.music.unpause()
+        return True
 
     def get_vol(self) -> Optional[float]:
         if not self.has_song():
