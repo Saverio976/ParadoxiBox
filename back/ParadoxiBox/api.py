@@ -97,5 +97,6 @@ def credits(_):
 @api.get("/quit", auth=AuthBearer(django_secret=True))
 def quit(request):
     header = {"Authorization": f"Bearer {request.auth}"}
-    requests.get(request.build_absolute_uri("/api/songs/stop"), headers=header)
+    res = requests.get(request.build_absolute_uri("/api/songs/stop"), headers=header)
+    print(res.text)
     return {"status": "ok"}

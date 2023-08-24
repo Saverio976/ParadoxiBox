@@ -157,7 +157,7 @@ def is_paused(_):
     return {"paused": PLAYER.get_paused()}
 
 
-@router.get("/stop")
+@router.get("/stop", auth=AuthBearer(True, True))
 def stop(_):
     PLAYER.stop()
 

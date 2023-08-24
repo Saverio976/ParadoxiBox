@@ -22,17 +22,18 @@ class DeleteUserSchema(Schema):
 
 
 class AuthBearer(HttpBearer):
-    def __init__(self, django_secret: bool = False) -> None:
+    def __init__(self, django_secret: bool = False, user: bool = True) -> None:
         super().__init__()
         self._django_secret = django_secret
+        self._user = user
 
     def authenticate(self, request, token):
         if self._django_secret:
             if token == settings.SECRET_KEY:
                 return token
-            return None
-        if UUser.is_connected(token):
-            return token
+        if self._user:
+            if UUser.is_connected(token):
+                return token
         return None
 
 
