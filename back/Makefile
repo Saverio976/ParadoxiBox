@@ -29,10 +29,13 @@ runserver-prod:
 		daphne ParadoxiBox.asgi:application -p ${PORT} -b ${HOST}
 
 migrate:
-	. ./.venv/bin/activate && ./manage.py migrate
+	. ./.venv/bin/activate && ./manage.py migrate --noinput
 
 makemigrations:
 	. ./.venv/bin/activate && ./manage.py makemigrations
+
+collectstatic:
+	. ./.venv/bin/activate && ./manage.py collectstatic --noinput
 
 shell:
 	. ./.venv/bin/activate && ./manage.py shell
@@ -48,7 +51,7 @@ pip-install:
 		echo "${PACKAGE}" >> requirements.txt; \
 	fi
 	if [ ! -d "./.venv" ]; then \
-		${PYTHON} -m venv ./.venv; \
+		${PYTHON} -m venv --system-site-packages ./.venv; \
 	fi
 	. ./.venv/bin/activate && pip install -U pip
 	. ./.venv/bin/activate && pip install -U wheel
@@ -57,7 +60,7 @@ pip-install:
 pip-install-dev: pip-install
 	. ./.venv/bin/activate && pip install -r requirements-dev.txt
 
-install: pip-install migrate
+install: pip-install migrate collectstatic
 
 service-setup:
 	PARADOXIBOX_FOLDER="$$PWD"				\
@@ -81,3 +84,7 @@ service-fclean:
 
 service-restart:
 	systemctl --user restart paradoxibox.service
+
+quit:
+	curl -L "${HOST}:${PORT}/api/quit" -H "Authorization: Bearer ${SECRET_KEY}"
+	ps -aux | grep "$$USER" | grep -v grep | grep "runserver-" | grep "make" | awk '{print "kill " $$2}' | sh

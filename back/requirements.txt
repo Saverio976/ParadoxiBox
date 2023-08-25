@@ -6,3 +6,7 @@ ytmusicapi
 django-cleanup
 Twisted[tls,http2]
 django-ninja
+orjson
+mutagen
+discord.py[voice]
+requests

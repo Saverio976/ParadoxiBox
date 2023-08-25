@@ -35,7 +35,7 @@ class Player:
         Initialize the process (player daemon)
         """
         if self._process_started is False:
-            from songs.player_daemon import PlayerDaemon
+            from songs.PlayerDaemon import PlayerDaemon
 
             logger_print("Starting process")
             self._queue_song = Queue()
@@ -43,15 +43,19 @@ class Player:
             self._queue_process_msg = Queue()
             self._queue_action.put(f"set_volume:{self._volume}")
             self._process_started = True
-            player_daemon = PlayerDaemon(
+            player_daemon = PlayerDaemon.PlayerDaemon(
                 queue_song=self._queue_song,
                 queue_action=self._queue_action,
                 queue_process_msg=self._queue_process_msg,
                 improvise=self._improvise,
                 default_number_improvise=DEFAULT_NUMBER_IMPROVISE,
             )
-            self._process = Process(target=player_daemon, daemon=True)
+            self._process = Process(target=player_daemon)
             self._process.start()
+
+    def __del__(self):
+        if self._process:
+            self._process.kill()
 
     def queue(self, song: Song) -> None:
         """
@@ -234,8 +238,15 @@ class Player:
         while self._current_song_time is None:
             self._proccess_msg_queue()
             time.sleep(0.01)
-        percent = self._current_song_time.total_seconds() * 100 / self._current_song.duration.total_seconds()
+        percent = (
+            self._current_song_time.total_seconds()
+            * 100
+            / self._current_song.duration.total_seconds()
+        )
         return percent
+
+    def process_events(self):
+        self._proccess_msg_queue()
 
 
 PLAYER = Player()

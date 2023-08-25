@@ -1,15 +1,16 @@
 import time
 from datetime import timedelta
 from multiprocessing import Queue
+from pathlib import Path
 from threading import Thread
 from typing import Optional
-
-import pygame
 
 from songs.logger import logger_print
 from songs.models import Song
 from songs.song_download_helper import download_song_helper
 from songs.ytdl import get_next_related, video_id_to_url
+
+from .musicplayer import MusicPlayer
 
 
 class PlayerDaemon:
@@ -27,25 +28,29 @@ class PlayerDaemon:
         self._queue_process_msg = queue_process_msg
         self._improvise = improvise
         self._stop = False
-        self._paused = False
         self._last_song: Optional[Song] = None
         self._default_number_improvise = default_number_improvise
         self._improvised_auto = False
+        self._music_player: MusicPlayer = MusicPlayer()
+        self._pass_next = False
 
     def __play_next(self) -> Optional[Song]:
         song = self._queue_song.get()
         filename = str(song.path_music.path)
         try:
-            pygame.mixer.music.load(filename)
+            self._music_player.play(Path(filename))
         except Exception as esc:
             logger_print(f"Error loading {filename} {esc}")
             return None
-        pygame.mixer.music.play()
+        self._music_player.set_pause(False)
         self._improvised_auto = False
         return song
 
     def get_pos(self) -> timedelta:
-        return timedelta(milliseconds=pygame.mixer.music.get_pos())
+        pos = self._music_player.get_pos()
+        if pos is None:
+            return timedelta(0)
+        return timedelta(seconds=pos)
 
     @staticmethod
     def improvise(
@@ -73,7 +78,12 @@ class PlayerDaemon:
             return False
 
     def __on_play(self) -> None:
-        if self._improvise and self._last_song and self._queue_song.empty() and self._improvised_auto is False:
+        if (
+            self._improvise
+            and self._last_song
+            and self._queue_song.empty()
+            and self._improvised_auto is False
+        ):
             duration_threshold: timedelta = self._last_song.duration - timedelta(
                 seconds=4
             )
@@ -93,44 +103,39 @@ class PlayerDaemon:
             return
         action = self._queue_action.get()
         if action == "pause":
-            pygame.mixer.music.pause()
-            self._paused = True
+            self._music_player.set_pause(True)
         elif action == "resume":
-            pygame.mixer.music.unpause()
-            self._paused = False
+            self._music_player.set_pause(False)
         elif action == "next":
-            pygame.mixer.music.stop()
-            self._paused = False
+            self._pass_next = True
         elif action == "stop":
-            pygame.mixer.music.stop()
+            self._music_player.stop()
             self._stop = True
-            self._paused = False
         elif action == "improvise_true":
             self._improvise = True
         elif action == "improvise_false":
             self._improvise = False
-        elif action == "improvise":
+        elif action.startswith("improvise_"):
+            nb_improvise = int(action[len("improvise_") :])
             Thread(
                 target=self.improvise,
                 args=(
                     self._queue_process_msg,
                     self._last_song,
-                    self._default_number_improvise,
+                    nb_improvise,
                 ),
             ).start()
         elif action == "get_pos":
             self._queue_process_msg.put("pos:" + str(self.get_pos().total_seconds()))
         elif action.startswith("set_volume:"):
             volume = int(action[len("set_volume:") :])
-            pygame.mixer.music.set_volume(volume / 100.0)
+            self._music_player.set_vol(volume)
         elif action == "get_volume":
-            volume = int(pygame.mixer.music.get_volume() * 100)
+            volume = self._music_player.get_vol()
             self._queue_process_msg.put(f"volume:{volume}")
         elif action.startswith("set_pos:") and self._last_song is not None:
             pos = int(action[len("set_pos:") :])
-            pos_second = self._last_song.duration.total_seconds() * (pos / 100.0)
-            pygame.mixer.music.rewind()
-            pygame.mixer.music.set_pos(pos_second)
+            self._music_player.set_pos(pos)
 
     def __on_next(self) -> None:
         self._queue_process_msg.put("next")
@@ -146,12 +151,18 @@ class PlayerDaemon:
             else:
                 time.sleep(0.1)
                 continue
-            while pygame.mixer.music.get_busy() or self._paused:
+            while self._music_player.has_song():
                 self.__react_event()
+                if self._pass_next:
+                    break
                 self.__on_play()
                 time.sleep(0.1)
             self.__on_next()
 
     def __call__(self) -> None:
-        pygame.mixer.init()
+        from .musicplayer_discordpy import MusicPlayerDiscordPy
+
+        self._music_player = MusicPlayerDiscordPy()
         self.__loop()
+        del self._music_player
+        self._music_player = MusicPlayer()
