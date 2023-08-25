@@ -1,12 +1,16 @@
-import orjson
 from pathlib import Path
 from typing import Optional
 
+import orjson
 from django.conf import settings
+
 from songs.logger import logger_print
 
+
 class MusicPlayer:
-    def __init__(self, configPath: Path = settings.BASE_DIR / "musicplayer.json") -> None:
+    def __init__(
+        self, configPath: Path = settings.BASE_DIR / "musicplayer.json"
+    ) -> None:
         """
         configPath: Path
             json file with some config for the music player backend

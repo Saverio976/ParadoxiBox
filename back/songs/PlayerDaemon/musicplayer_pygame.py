@@ -1,13 +1,18 @@
+from datetime import timedelta
 from pathlib import Path
 from typing import Optional
+
 import pygame
-from datetime import timedelta
-from .musicplayer import MusicPlayer
-from mutagen.mp3 import MP3
 from django.conf import settings
+from mutagen.mp3 import MP3
+
+from .musicplayer import MusicPlayer
+
 
 class MusicPlayerPygame(MusicPlayer):
-    def __init__(self, configPath: Path = settings.BASE_DIR / "musicplayer-pygame.json") -> None:
+    def __init__(
+        self, configPath: Path = settings.BASE_DIR / "musicplayer-pygame.json"
+    ) -> None:
         """Suport only mp3 for now"""
         super().__init__(configPath)
         pygame.mixer.init()
@@ -41,9 +46,7 @@ class MusicPlayerPygame(MusicPlayer):
     def get_pos(self) -> Optional[float]:
         if not self.has_song():
             return None
-        seconds = timedelta(
-            milliseconds=pygame.mixer.music.get_pos()
-        ).total_seconds()
+        seconds = timedelta(milliseconds=pygame.mixer.music.get_pos()).total_seconds()
         return seconds
 
     def get_pos_max(self) -> Optional[float]:

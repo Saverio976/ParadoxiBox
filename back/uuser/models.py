@@ -1,15 +1,18 @@
-from typing import Any, Optional
-from django.db import models
-import secrets
-
 import hashlib
+import secrets
+from typing import Any, Optional
+
+from django.db import models
 
 # Create your models here.
 
 LENGTH_BEARER = 32
 
+
 class UUser(models.Model):
-    bearer = models.CharField(max_length=LENGTH_BEARER, blank=True, null=True, unique=True)
+    bearer = models.CharField(
+        max_length=LENGTH_BEARER, blank=True, null=True, unique=True
+    )
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=255)
     password = models.CharField(max_length=512)
@@ -44,7 +47,7 @@ class UUser(models.Model):
         user.save()
 
     @staticmethod
-    def connect(email: str, password: str) -> Optional['UUser']:
+    def connect(email: str, password: str) -> Optional["UUser"]:
         password = UUser.crypt(password)
         try:
             user = UUser.objects.get(email=email, password=password)
@@ -62,7 +65,7 @@ class UUser(models.Model):
         return user
 
     @staticmethod
-    def create(email: str, username: str, password: str) -> Optional['UUser']:
+    def create(email: str, username: str, password: str) -> Optional["UUser"]:
         try:
             user = UUser.objects.get(email=email)
             return None

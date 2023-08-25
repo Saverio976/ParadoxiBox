@@ -1,24 +1,24 @@
-from pathlib import Path
 import asyncio
-from threading import Thread, Lock
-from multiprocessing import Process, Queue
-from typing import Any, Callable, Optional, Tuple, Union
+import time
 from datetime import timedelta
-from discord.ext import tasks
+from multiprocessing import Process, Queue
+from pathlib import Path
+from typing import Any, Optional, Tuple, Union
 
+import discord
+from discord.ext import tasks
+from django.conf import settings
 from mutagen.mp3 import MP3
 
 from songs.logger import logger_print
+
 from .musicplayer import MusicPlayer
-import discord
 
-import time
-
-from django.conf import settings
 
 def _on_end(e: Any):
     if e:
         logger_print("ERROR: MusicPlayerDiscordPy:", e)
+
 
 class AudioSourceTracked(discord.PCMVolumeTransformer[discord.FFmpegPCMAudio]):
     def __init__(self, source: discord.FFmpegPCMAudio):
@@ -33,10 +33,17 @@ class AudioSourceTracked(discord.PCMVolumeTransformer[discord.FFmpegPCMAudio]):
 
     @property
     def progress(self) -> float:
-        return self._count_20ms * 0.02 # count_20ms * 20ms
+        return self._count_20ms * 0.02  # count_20ms * 20ms
+
 
 class MusicPlayerDiscordPyDaemon:
-    def __init__(self, queue_in: "Queue[str]", queue_out: "Queue[str]", token: str, voice_channel_id: int) -> None:
+    def __init__(
+        self,
+        queue_in: "Queue[str]",
+        queue_out: "Queue[str]",
+        token: str,
+        voice_channel_id: int,
+    ) -> None:
         """only mp3 for now"""
         super().__init__()
 
@@ -49,7 +56,12 @@ class MusicPlayerDiscordPyDaemon:
         self._volume: Optional[float] = None
 
     @staticmethod
-    def send_msg(queue: "Queue[str]", title: str, value: Union[bool, float, None, str], no_value: bool = False):
+    def send_msg(
+        queue: "Queue[str]",
+        title: str,
+        value: Union[bool, float, None, str],
+        no_value: bool = False,
+    ):
         if no_value:
             queue.put(title)
             return
@@ -129,18 +141,23 @@ class MusicPlayerDiscordPyDaemon:
         async def on_ready():
             if self._client.user is None:
                 return
-            logger_print(f'Logged in as {self._client.user} (ID: {self._client.user.id})')
+            logger_print(
+                f"Logged in as {self._client.user} (ID: {self._client.user.id})"
+            )
             react_event.start()
+            await self._client.change_presence(activity=discord.Game(name="with music"))
 
         loop.run_until_complete(self._client.start(self._token))
 
     async def _ensure_connected(self) -> Optional[discord.VoiceClient]:
         while not self._client.is_ready():
             time.sleep(0.01)
+
         def check_id(x: Any):
             if isinstance(x, discord.VoiceClient):
                 return x.channel.id == self._voice_channel_id
             return False
+
         voices_clients = self._client.voice_clients
         for i, val in enumerate(map(check_id, voices_clients)):
             voice_client = voices_clients[i]
@@ -152,7 +169,6 @@ class MusicPlayerDiscordPyDaemon:
             return None
         await voice_channel.connect()
         return await self._ensure_connected()
-
 
     async def _has_song(self) -> bool:
         """
@@ -213,7 +229,7 @@ class MusicPlayerDiscordPyDaemon:
 
         return false if no song played; true otherwise
         """
-        voice_client =  await self._ensure_connected()
+        voice_client = await self._ensure_connected()
         if voice_client is None:
             return False
         if not await self._has_song():
@@ -286,8 +302,11 @@ class MusicPlayerDiscordPyDaemon:
             return True
         return False
 
+
 class MusicPlayerDiscordPy(MusicPlayer):
-    def __init__(self, configPath: Path = settings.BASE_DIR / "musicplayer-discordpy.json") -> None:
+    def __init__(
+        self, configPath: Path = settings.BASE_DIR / "musicplayer-discordpy.json"
+    ) -> None:
         """
         configPath: Path
             json file with some config for the music player backend
@@ -295,7 +314,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
         super().__init__(configPath)
         self._queue_in: "Queue[str]" = Queue()
         self._queue_out: "Queue[str]" = Queue()
-        self._music_daemon = MusicPlayerDiscordPyDaemon(self._queue_in, self._queue_out, self.conf_json["token"], self.conf_json["voice_channel_id"])
+        self._music_daemon = MusicPlayerDiscordPyDaemon(
+            self._queue_in,
+            self._queue_out,
+            self.conf_json["token"],
+            self.conf_json["voice_channel_id"],
+        )
         self._process = Process(target=self._music_daemon.start, daemon=True)
         self._process.start()
 
