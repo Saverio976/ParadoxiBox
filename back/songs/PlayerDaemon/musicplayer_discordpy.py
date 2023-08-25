@@ -2,8 +2,10 @@ import asyncio
 import time
 from datetime import timedelta
 from multiprocessing import Process, Queue
+from threading import Lock
 from pathlib import Path
 from typing import Any, Optional, Tuple, Union
+from string import Template
 
 import discord
 from discord.ext import tasks
@@ -21,9 +23,10 @@ def _on_end(e: Any):
 
 
 class AudioSourceTracked(discord.PCMVolumeTransformer[discord.FFmpegPCMAudio]):
-    def __init__(self, source: discord.FFmpegPCMAudio):
+    def __init__(self, source: discord.FFmpegPCMAudio, start: float = 0):
         super().__init__(source)
         self._count_20ms = 0
+        self._start = start
 
     def read(self) -> bytes:
         data = super().read()
@@ -33,8 +36,19 @@ class AudioSourceTracked(discord.PCMVolumeTransformer[discord.FFmpegPCMAudio]):
 
     @property
     def progress(self) -> float:
-        return self._count_20ms * 0.02  # count_20ms * 20ms
+        return (self._count_20ms * 0.02) + self._start  # count_20ms * 20ms
 
+
+class DeltaTemplate(Template):
+    delimiter = "%"
+
+# from https://stackoverflow.com/a/8907269
+def strfdelta(tdelta: timedelta, fmt: str):
+    d = {"D": tdelta.days}
+    d["H"], rem = divmod(tdelta.seconds, 3600)
+    d["M"], d["S"] = divmod(rem, 60)
+    t = DeltaTemplate(fmt)
+    return t.substitute(**d)
 
 class MusicPlayerDiscordPyDaemon:
     def __init__(
@@ -80,6 +94,8 @@ class MusicPlayerDiscordPyDaemon:
 
     @staticmethod
     def get_msg(msg: str) -> Tuple[str, Union[bool, float, None, str]]:
+        if ":" not in msg:
+            return (msg, None)
         title, res = msg.split(":", 1)
         if res == "None" or res == "":
             return (title, None)
@@ -95,10 +111,13 @@ class MusicPlayerDiscordPyDaemon:
     async def _react_event(self):
         if self._queue_in.empty():
             return
-        msg = self._queue_in.get()
+        msg = self._queue_in.get_nowait()
+        if msg == "":
+            return
         title, value = self.get_msg(msg)
         if title == "stop":
             await self._client.close()
+            self.send_msg(self._queue_out, "stop", None, True)
         elif title == "play" and isinstance(value, str):
             res = await self._play(value)
             self.send_msg(self._queue_out, "play", res)
@@ -127,7 +146,7 @@ class MusicPlayerDiscordPyDaemon:
             res = await self._get_vol_max()
             self.send_msg(self._queue_out, "get_vol_max", res)
         elif title == "set_vol" and isinstance(value, float):
-            res = await self._set_pos(value)
+            res = await self._set_vol(value)
             self.send_msg(self._queue_out, "set_vol", res)
 
     def start(self):
@@ -179,8 +198,7 @@ class MusicPlayerDiscordPyDaemon:
         voice_client = await self._ensure_connected()
         if voice_client is None:
             return False
-        source = voice_client.source
-        return not (source is None)
+        return voice_client.is_playing() or voice_client.is_paused()
 
     async def _play(self, filepath: str) -> bool:
         """
@@ -207,9 +225,8 @@ class MusicPlayerDiscordPyDaemon:
         voice_client = await self._ensure_connected()
         if voice_client is None:
             return None
-        source = voice_client.source
-        if isinstance(source, AudioSourceTracked):
-            return timedelta(milliseconds=source.progress).total_seconds()
+        if isinstance(voice_client.source, AudioSourceTracked):
+            return timedelta(milliseconds=voice_client.source.progress).total_seconds()
         return None
 
     async def _get_pos_max(self) -> Optional[float]:
@@ -234,10 +251,10 @@ class MusicPlayerDiscordPyDaemon:
             return False
         if not await self._has_song():
             return False
-        source = AudioSourceTracked(discord.FFmpegPCMAudio(self._cur_song))
-        for _ in range(int(pos * 1000)):
-            source.read()
-        voice_client.source = source
+        formated = strfdelta(timedelta(seconds=pos), "%H:%M:%S")
+        source = AudioSourceTracked(discord.FFmpegPCMAudio(self._cur_song, before_options=f"-ss {formated}"), start=pos)
+        voice_client.stop()
+        voice_client.play(source, after=_on_end)
         return True
 
     async def _get_pause(self) -> bool:
@@ -273,9 +290,8 @@ class MusicPlayerDiscordPyDaemon:
         voice_client = await self._ensure_connected()
         if voice_client is None:
             return None
-        source = voice_client.source
-        if isinstance(source, AudioSourceTracked):
-            return source.volume * 100.0
+        if isinstance(voice_client.source, AudioSourceTracked):
+            return voice_client.source.volume * 100.0
         return None
 
     async def _get_vol_max(self) -> Optional[float]:
@@ -295,12 +311,11 @@ class MusicPlayerDiscordPyDaemon:
         voice_client = await self._ensure_connected()
         if voice_client is None:
             return False
-        source = voice_client.source
-        if isinstance(source, AudioSourceTracked):
-            source.volume = vol / 100.0
-            self._volume = vol
+        self._volume = vol
+        if isinstance(voice_client.source, AudioSourceTracked):
+            voice_client.source.volume = vol / 100.0
             return True
-        return False
+        return True
 
 
 class MusicPlayerDiscordPy(MusicPlayer):
@@ -322,13 +337,19 @@ class MusicPlayerDiscordPy(MusicPlayer):
         )
         self._process = Process(target=self._music_daemon.start, daemon=True)
         self._process.start()
+        self._lock = Lock()
 
     def __del__(self):
         self._process.join()
 
     def _empty_queue(self):
         while not self._queue_out.empty():
-            self._queue_out.get()
+            time.sleep(0.01)
+
+    def _get_next_msg(self):
+        while self._queue_out.empty():
+            time.sleep(0.01)
+        return self._queue_out.get()
 
     def has_song(self) -> bool:
         """
@@ -336,10 +357,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
 
         return false if no song; true otherwise
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "has_song", None, True)
-        msg = self._queue_out.get()
-        val = self._music_daemon.get_msg(msg)
+        msg = self._get_next_msg()
+        _, val = self._music_daemon.get_msg(msg)
+        self._lock.release()
         if isinstance(val, bool):
             return val
         return False
@@ -350,10 +373,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
 
         return false if can't play it; true otherwise
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "play", str(filepath), False)
-        msg = self._queue_out.get()
+        msg = self._get_next_msg()
         _, val = self._music_daemon.get_msg(msg)
+        self._lock.release()
         if isinstance(val, bool):
             return val
         return False
@@ -364,10 +389,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
 
         return None if no song played; the number of seconds otherwise
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "get_pos", None, True)
-        msg = self._queue_out.get()
+        msg = self._get_next_msg()
         _, val = self._music_daemon.get_msg(msg)
+        self._lock.release()
         if isinstance(val, float):
             return val
         return None
@@ -378,10 +405,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
 
         return None if no song played; the number of seconds otherwise
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "get_pos_max", None, True)
-        msg = self._queue_out.get()
+        msg = self._get_next_msg()
         _, val = self._music_daemon.get_msg(msg)
+        self._lock.release()
         if isinstance(val, float):
             return val
         return None
@@ -392,10 +421,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
 
         return false if no song played; true otherwise
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "set_pos", pos, False)
-        msg = self._queue_out.get()
+        msg = self._get_next_msg()
         _, val = self._music_daemon.get_msg(msg)
+        self._lock.release()
         if isinstance(val, bool):
             return val
         return False
@@ -406,10 +437,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
 
         return true if song paused; otherwise false
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "get_pause", None, True)
-        msg = self._queue_out.get()
+        msg = self._get_next_msg()
         _, val = self._music_daemon.get_msg(msg)
+        self._lock.release()
         if isinstance(val, bool):
             return val
         return False
@@ -418,10 +451,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
         """
         Set status of pause
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "set_pause", paused, False)
-        msg = self._queue_out.get()
+        msg = self._get_next_msg()
         _, val = self._music_daemon.get_msg(msg)
+        self._lock.release()
         if isinstance(val, bool):
             return val
         return False
@@ -432,10 +467,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
 
         return None if no volume; else the number
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "get_vol", None, True)
-        msg = self._queue_out.get()
+        msg = self._get_next_msg()
         _, val = self._music_daemon.get_msg(msg)
+        self._lock.release()
         if isinstance(val, float):
             return val
         return None
@@ -446,10 +483,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
 
         return None if no volume; else the number
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "get_vol_max", None, True)
-        msg = self._queue_out.get()
+        msg = self._get_next_msg()
         _, val = self._music_daemon.get_msg(msg)
+        self._lock.release()
         if isinstance(val, float):
             return val
         return None
@@ -460,10 +499,12 @@ class MusicPlayerDiscordPy(MusicPlayer):
 
         return false if volume can't be updated; true otherwise
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "set_vol", vol, False)
-        msg = self._queue_out.get()
+        msg = self._get_next_msg()
         _, val = self._music_daemon.get_msg(msg)
+        self._lock.release()
         if isinstance(val, bool):
             return val
         return False
@@ -472,5 +513,9 @@ class MusicPlayerDiscordPy(MusicPlayer):
         """
         Stop all action (the player will shutdown maybe)
         """
+        self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "stop", None, True)
+        msg = self._get_next_msg()
+        _ = self._music_daemon.get_msg(msg)
+        self._lock.release()
