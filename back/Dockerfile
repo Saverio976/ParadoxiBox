@@ -20,7 +20,7 @@ RUN apt-get update                  \
         python3-dev                 \
         python3-numpy               \
         python3-pygame              \
-	libssl-dev                  \
+        libssl-dev                  \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > ./install_rust.sh
@@ -34,7 +34,7 @@ WORKDIR /app
 COPY requirements.txt /app/requirements.txt
 COPY Makefile /app/Makefile
 
-RUN make pip-install
+RUN LIBSODIUM_MAKE_ARGS=-j make pip-install
 
 COPY manage.py /app/manage.py
 COPY ParadoxiBox /app/ParadoxiBox
