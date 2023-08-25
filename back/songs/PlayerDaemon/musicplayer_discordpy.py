@@ -68,6 +68,7 @@ class MusicPlayerDiscordPyDaemon:
         self._queue_in = queue_in
         self._queue_out = queue_out
         self._volume: Optional[float] = None
+        self.__react_event_task: Optional[Any] = None
 
     @staticmethod
     def send_msg(
@@ -116,8 +117,7 @@ class MusicPlayerDiscordPyDaemon:
             return
         title, value = self.get_msg(msg)
         if title == "stop":
-            await self._client.close()
-            self.send_msg(self._queue_out, "stop", None, True)
+            await self._stop()
         elif title == "play" and isinstance(value, str):
             res = await self._play(value)
             self.send_msg(self._queue_out, "play", res)
@@ -156,6 +156,8 @@ class MusicPlayerDiscordPyDaemon:
         async def react_event():
             await self._react_event()
 
+        self.__react_event_task = react_event
+
         @self._client.event
         async def on_ready():
             if self._client.user is None:
@@ -167,6 +169,17 @@ class MusicPlayerDiscordPyDaemon:
             await self._client.change_presence(activity=discord.Game(name="with music"))
 
         loop.run_until_complete(self._client.start(self._token))
+
+    async def _stop(self):
+        voice_client = await self._ensure_connected()
+        if voice_client:
+            voice_client.stop()
+            await voice_client.disconnect()
+        if self.__react_event_task:
+            self.__react_event_task.stop()
+        self.send_msg(self._queue_out, "stop", None, True)
+        await self._client.close()
+        print("out of loop")
 
     async def _ensure_connected(self) -> Optional[discord.VoiceClient]:
         while not self._client.is_ready():
@@ -338,6 +351,7 @@ class MusicPlayerDiscordPy(MusicPlayer):
         self._process = Process(target=self._music_daemon.start, daemon=True)
         self._process.start()
         self._lock = Lock()
+        self._stoped = False
 
     def __del__(self):
         self._process.join()
@@ -357,6 +371,8 @@ class MusicPlayerDiscordPy(MusicPlayer):
 
         return false if no song; true otherwise
         """
+        if self._stoped:
+            return False
         self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "has_song", None, True)
@@ -516,6 +532,6 @@ class MusicPlayerDiscordPy(MusicPlayer):
         self._lock.acquire()
         self._empty_queue()
         self._music_daemon.send_msg(self._queue_in, "stop", None, True)
-        msg = self._get_next_msg()
-        _ = self._music_daemon.get_msg(msg)
+        _ = self._get_next_msg()
+        self._stoped = True
         self._lock.release()

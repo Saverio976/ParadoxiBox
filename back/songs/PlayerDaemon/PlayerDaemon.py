@@ -153,10 +153,12 @@ class PlayerDaemon:
                 continue
             while self._music_player.has_song():
                 self.__react_event()
-                if self._pass_next:
+                if self._pass_next or self._stop:
                     break
                 self.__on_play()
                 time.sleep(0.1)
+            if self._stop:
+                break
             self.__on_next()
 
     def __call__(self) -> None:
