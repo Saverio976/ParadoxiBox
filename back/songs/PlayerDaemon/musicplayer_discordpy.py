@@ -46,6 +46,7 @@ class MusicPlayerDiscordPyDaemon:
         self._cur_song = ""
         self._queue_in = queue_in
         self._queue_out = queue_out
+        self._volume: Optional[float] = None
 
     @staticmethod
     def send_msg(queue: "Queue[str]", title: str, value: Union[bool, float, None, str], no_value: bool = False):
@@ -177,6 +178,8 @@ class MusicPlayerDiscordPyDaemon:
         source = AudioSourceTracked(discord.FFmpegPCMAudio(str(filepath)))
         voice_client.play(source, after=_on_end)
         self._cur_song = str(filepath)
+        if not (self._volume is None):
+            await self._set_vol(self._volume)
         return True
 
     async def _get_pos(self) -> Optional[float]:
@@ -279,6 +282,7 @@ class MusicPlayerDiscordPyDaemon:
         source = voice_client.source
         if isinstance(source, AudioSourceTracked):
             source.volume = vol / 100.0
+            self._volume = vol
             return True
         return False
 
