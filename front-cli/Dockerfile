@@ -21,6 +21,6 @@ RUN git clone https://github.com/vlang/v /opt/v \
 WORKDIR /app
 COPY . /app
 
-RUN make paradoxibox-cli-prod
+RUN make paradoxibox-cli-prod-linux
 
 ENTRYPOINT ["/app/paradoxibox-cli"]
