@@ -1,8 +1,13 @@
 module main
 
 import net.http
+import x.json2
 
-fn api_is_paused(api_url string, bearer string) ! {
+pub struct IsPausedResponse {
+	paused bool
+}
+
+fn api_is_paused(api_url string, bearer string) !bool {
 	resp := http.fetch(http.FetchConfig{
 		url: api_url + '/songs/is-paused'
 		method: http.Method.get
@@ -13,4 +18,6 @@ fn api_is_paused(api_url string, bearer string) ! {
 	if resp.status_code != 200 {
 		return error('Unexpected status code: ${resp.status_code}')
 	}
+	resp_json := json2.decode[IsPausedResponse](resp.body)!
+	return resp_json.paused
 }

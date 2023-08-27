@@ -22,7 +22,6 @@ fn get_conf_cli_file() string {
 }
 
 fn cmd_login(cmd cli.Command) ! {
-	println('hello')
 	os.mkdir_all(get_conf_cli_path())!
 	if !os.is_file(get_conf_cli_file()) {
 		os.write_file(get_conf_cli_file(), json2.encode[ConfigCLI](ConfigCLI{}))!

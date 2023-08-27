@@ -26,6 +26,11 @@ fn main() {
 	app.add_command(command_queue_conf)
 	app.add_command(command_login_conf)
 	app.add_command(command_add_song_conf)
+	app.add_command(command_next_conf)
+	app.add_command(command_is_paused_conf)
+	app.add_command(command_pause_conf)
+	app.add_command(command_resume_conf)
+	app.add_command(command_create_account_conf)
 	app.setup()
 	app.parse(os.args)
 }

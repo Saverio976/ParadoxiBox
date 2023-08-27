@@ -3,8 +3,8 @@
 ## Usage
 
 ```txt
-❯ paradoxibox-cli --help
-Usage: paradoxibox-cli [flags] [commands] ./paradoxibox-cli
+❯ ./paradoxibox-cli --help
+Usage: ./paradoxibox-cli [flags] [commands] ./paradoxibox-cli
 
 ParadoxiBox cli ( https://github.com/Saverio976/ParadoxiBox )
 
@@ -17,6 +17,11 @@ Commands:
   queue               Show music in the queue
   login               Login to the api
   add                 Add a song to the queue
+  next                Skip to the next song
+  is-paused           Check current song is paused
+  pause               Pause current song
+  resume              Resume current song
+  create-account      Create an Account to the api
   help                Prints help information.
   man                 Prints the auto-generated manpage.
 ```

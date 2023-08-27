@@ -14,7 +14,7 @@ fn api_add_song(api_url string, bearer string, song AddSong) ! {
 		resp := http.fetch(http.FetchConfig{
 			url: api_url + '/songs/queue/add/song/url'
 			params: {
-				'url': song.url_song or { "" }
+				'url': song.url_song or { '' }
 			}
 			method: http.Method.get
 			header: http.new_header_from_map({
@@ -29,7 +29,7 @@ fn api_add_song(api_url string, bearer string, song AddSong) ! {
 		resp := http.fetch(http.FetchConfig{
 			url: api_url + '/songs/queue/add/song/search'
 			params: {
-				'search': song.search_song or { "" }
+				'search': song.search_song or { '' }
 			}
 			method: http.Method.get
 			header: http.new_header_from_map({
@@ -44,7 +44,7 @@ fn api_add_song(api_url string, bearer string, song AddSong) ! {
 		resp := http.fetch(http.FetchConfig{
 			url: api_url + '/songs/queue/add/playlist/url'
 			params: {
-				'url': song.url_playlist or { "" }
+				'url': song.url_playlist or { '' }
 			}
 			method: http.Method.get
 			header: http.new_header_from_map({
