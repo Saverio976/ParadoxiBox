@@ -29,7 +29,7 @@ Commands:
 # CRI="podman" # uncomment this line if you want to use podman
 # CRI="docker" # uncomment this line if you want to use docker
 
-CRI run ghcr.io/saverio976/paradoxibox-front-cli:main --help
+CRI run -v $HOME/.config/paradoxibox-cli:/root/.config/paradoxibox-cli ghcr.io/saverio976/paradoxibox-front-cli:main --help
 ```
 
 ### From Source
