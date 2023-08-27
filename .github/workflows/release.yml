@@ -27,8 +27,8 @@ jobs:
       - name: Build front-cli
         run: |
           cd front-cli
-          make paradoxibox-cli-linux
-          make paradoxibox-cli-windows
+          make paradoxibox-cli-prod-linux
+          make paradoxibox-cli-prod-windows
 
       - name: Upload to release (binary linux)
         uses: actions/upload-artifact@v3
