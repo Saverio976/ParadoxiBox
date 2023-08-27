@@ -68,7 +68,7 @@ SECRET_KEY='django-secret-key-wow-so-random0123456789'
 docker run                                              \
     -it                                                 \
     -p $PORT:$PORT                                      \
-    ghcr.io/saverio976/paradoxibox:main                 \
+    ghcr.io/saverio976/paradoxibox-back:main            \
     HOST=$HOST                                          \
     PORT=$PORT                                          \
     ALLOWED_HOST=$ALLOWED_HOST                          \

@@ -23,9 +23,19 @@ Commands:
 
 ## Install
 
+### From Docker/Podman
+
+```bash
+# CRI="podman" # uncomment this line if you want to use podman
+# CRI="docker" # uncomment this line if you want to use docker
+
+CRI run ghcr.io/saverio976/paradoxibox-front-cli:main --help
+```
+
 ### From Source
 
 ```bash
 # install vlang (https://github.com/vlang/v#installing-v-from-source)
 make
+./paradoxibox-cli --help
 ```

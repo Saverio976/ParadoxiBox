@@ -20,6 +20,10 @@ class SongSchema(Schema):
     file_url: str
 
 
+class SongsSchema(Schema):
+    songs: List[SongSchema]
+
+
 class CurrentSongSchema(Schema):
     song: Optional[SongSchema] = None
     song_pos: Optional[float] = None
@@ -54,13 +58,13 @@ class VolumeStatusSchema(Schema):
 # QUEUE / CURRENT
 
 
-@router.get("/queue", response=List[SongSchema])
+@router.get("/queue", response=SongsSchema)
 def get_queue(_):
     cur_song, _ = PLAYER.get_current_song()
     if cur_song is None:
-        return []
+        return {"songs": []}
     values = [cur_song.to_json()] + [song.to_json() for song in PLAYER.get_list_song()]
-    return values
+    return {"songs": values}
 
 
 @router.get("/queue/current", response=CurrentSongSchema)
