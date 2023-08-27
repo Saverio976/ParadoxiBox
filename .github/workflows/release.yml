@@ -54,7 +54,7 @@ jobs:
 
 
       - name: Package back folder
-        run: tar -zcvf paradoxibox-back.tar.gz paradoxibox
+        run: tar -zcvf paradoxibox-back.tar.gz back
 
       - name: Upload to release (binary linux)
         uses: actions/upload-artifact@v3
