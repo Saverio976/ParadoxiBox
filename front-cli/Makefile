@@ -5,8 +5,11 @@ all: $(TARGET)
 $(TARGET):
 	v -o "$(TARGET)" .
 
-$(TARGET)-prod:
-	v -o "$(TARGET)" -prod .
+$(TARGET)-prod-linux:
+	v -os linux -o "$(TARGET)" -skip-unused -show-timings -prod .
+
+$(TARGET)-prod-windows:
+	v -os windows -o "$(TARGET)" -skip-unused -show-timings -prod .
 
 fclean:
 	rm -f $(TARGET)

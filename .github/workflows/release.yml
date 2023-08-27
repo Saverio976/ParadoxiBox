@@ -1,0 +1,46 @@
+name: Build and release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+
+  release-exe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt install -y gcc make git libssl-dev build-essential gcc-mingw-w64-x86-64
+
+      - name: Install vlang
+        run: |
+          git clone https://github.com/vlang/v.git
+          cd v
+          make install
+          sudo ./v symlink
+
+      - name: Install dependencies
+        run: sudo dnf install -y tar gzip libconfig-devel libconfig
+
+      - name: Build front-cli
+        run: |
+          cd front-cli
+          make paradoxibox-cli-linux
+          make paradoxibox-cli-windows
+
+      - name: Upload to release (binary linux)
+        uses: actions/upload-artifact@v3
+        with:
+          name: paradoxibox-cli-linux
+          path: front-cli/paradoxibox-cli
+
+      - name: Upload to release (binary windows)
+        uses: actions/upload-artifact@v3
+        with:
+          name: paradoxibox-cli-windows.exe
+          path: front-cli/paradoxibox-cli.exe
