@@ -1,4 +1,4 @@
-name: ci
+name: Docker front-cli
 
 on:
   push:
