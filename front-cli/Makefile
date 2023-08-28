@@ -8,10 +8,10 @@ $(TARGET):
 .PHONY: $(TARGET)
 
 $(TARGET)-prod-linux:
-	CFLGAS=-static v -os linux -o "$(TARGET)" -skip-unused -show-timings -prod .
+	v -os linux -o "$(TARGET)" -skip-unused -show-timings -ldflags '-static' -prod .
 
 $(TARGET)-prod-windows:
-	CFLGAS=-static v -os windows -o "$(TARGET)" -skip-unused -show-timings -prod .
+	v -os windows -o "$(TARGET)" -skip-unused -show-timings -prod .
 
 fclean:
 	rm -f $(TARGET)
