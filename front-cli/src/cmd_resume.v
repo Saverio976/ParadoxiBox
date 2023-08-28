@@ -11,5 +11,5 @@ fn cmd_resume(cmd cli.Command) ! {
 const command_resume_conf = cli.Command{
 	name: 'resume'
 	description: 'Resume current song'
-	execute: cmd_pause
+	execute: cmd_resume
 }
