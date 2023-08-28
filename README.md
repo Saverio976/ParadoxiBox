@@ -12,6 +12,8 @@ A Music Player on a Server with web controller
 - Terminal User Interface to communicate with the backend (made in [vlang](https://www.vlang.io))
 - Automatically play a new song based on the last played song if option is turned on (thanks to [ytmusicapi](https://ytmusicapi.readthedocs.io))
 - Support variety of music/video providers (thanks to [yt-dlp](https://github.com/yt-dlp/yt-dlp))
+- Backend play music through [pygame](https://www.pygame.org/)
+- Backend play music through [discord.py](https://discordpy.readthedocs.io/en/latest/)
 
 ## USAGE
 
