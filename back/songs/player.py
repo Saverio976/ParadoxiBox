@@ -140,7 +140,7 @@ class Player:
                     except:
                         pass
                 elif msg.startswith("volume:"):
-                    self._volume = int(msg[len("volume:") :])
+                    self._volume = int(float(msg[len("volume:") :]))
 
     def get_list_song(self) -> List[Song]:
         """
