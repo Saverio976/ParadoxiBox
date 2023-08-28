@@ -37,6 +37,14 @@ Commands:
 CRI run -v $HOME/.config/paradoxibox-cli:/root/.config/paradoxibox-cli ghcr.io/saverio976/paradoxibox-front-cli:main --help
 ```
 
+### From binary
+Download the binary from [latest release](https://github.com/Saverio976/ParadoxiBox/releases/latest)
+
+Available binary are:
+- `paradoxibox-cli-linux` for Linux
+- `paradoxibox-cli-windows.exe` for windows
+- `paradoxibox-cli-macos` for macOS
+
 ### From Source
 
 ```bash
