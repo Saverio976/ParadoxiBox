@@ -29,6 +29,7 @@ class Player:
         self._improvise = False
         self._locker = Lock()
         self._volume = DEFAULT_VOLUME
+        self._volume_modified = False
 
     def _init_process(self) -> None:
         """
@@ -141,6 +142,7 @@ class Player:
                         pass
                 elif msg.startswith("volume:"):
                     self._volume = int(float(msg[len("volume:") :]))
+                    self._volume_modified = True
 
     def get_list_song(self) -> List[Song]:
         """
@@ -200,9 +202,11 @@ class Player:
         """
         self._proccess_msg_queue()
         if self._queue_action:
+            self._volume_modified = False
             self._queue_action.put("get_volume")
-        time.sleep(0.15)
-        self._proccess_msg_queue()
+            while self._volume_modified == False:
+                self._proccess_msg_queue()
+                time.sleep(0.15)
         return self._volume
 
     def set_volume(self, volume: int) -> None:
