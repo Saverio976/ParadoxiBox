@@ -1,7 +1,7 @@
 module main
 
 import cli
-import x.json2
+import time
 
 fn cmd_queue(cmd cli.Command) ! {
 	bearer := get_bearer() or { return error('Login first with command login') }
@@ -10,7 +10,11 @@ fn cmd_queue(cmd cli.Command) ! {
 
 	println('${songs.len} Songs queued...')
 	for song in songs {
-		println(json2.encode_pretty[SongQueued](song))
+		println('-----> ${song.title}')
+		println('artist: ${song.artist}')
+		println('url: ${song.source_link}')
+		duration := time.Duration(isize(song.duration_second) * time.second).debug()
+		println(duration)
 	}
 }
 
