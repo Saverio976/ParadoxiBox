@@ -7,6 +7,7 @@ import x.json2
 struct ConfigCLI {
 mut:
 	bearer ?string
+	url_api ?string
 }
 
 fn get_conf_dir() string {
@@ -33,6 +34,7 @@ fn cmd_login(cmd cli.Command) ! {
 	}
 	url_api := cmd.flags.get_string('url-api')!
 	conf.bearer = api_login(url_api, email, password)!
+	conf.url_api = url_api
 	os.write_file(get_conf_cli_file(), json2.encode[ConfigCLI](conf))!
 }
 
@@ -42,6 +44,14 @@ fn get_bearer() !string {
 		return error('No bearer, please login')
 	}
 	return conf.bearer or { '' }
+}
+
+fn get_url_api() !string {
+	conf := json2.decode[ConfigCLI](os.read_file(get_conf_cli_file())!)!
+	if conf.url_api == none {
+		return error('No url api, please login')
+	}
+	return conf.url_api or { '' }
 }
 
 const command_login_conf = cli.Command{
@@ -61,6 +71,13 @@ const command_login_conf = cli.Command{
 			name: 'password'
 			abbrev: 'p'
 			description: 'Password (if not provided, you will be prompted)'
+		},
+		cli.Flag{
+			flag: cli.FlagType.string
+			name: 'url-api'
+			abbrev: 'u'
+			description: 'ParadoxiBox api url (i.e.: http://localhost:8080/api)'
+			required: true
 		},
 	]
 }

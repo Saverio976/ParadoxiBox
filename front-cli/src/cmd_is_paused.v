@@ -4,7 +4,7 @@ import cli
 
 fn cmd_is_paused(cmd cli.Command) ! {
 	bearer := get_bearer() or { return error('Login first with command login') }
-	api_url := cmd.flags.get_string('url-api')!
+	api_url := get_url_api()!
 	is_paused := api_is_paused(api_url, bearer)!
 
 	println('is paused: ${is_paused}')

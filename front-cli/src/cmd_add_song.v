@@ -4,7 +4,7 @@ import cli
 
 fn cmd_add_song(cmd cli.Command) ! {
 	bearer := get_bearer() or { return error('Login first with command login') }
-	api_url := cmd.flags.get_string('url-api')!
+	api_url := get_url_api()!
 	mut songs := AddSong{}
 
 	if cmd.flags.get_all_found().get_string('song-url') or { '' } != '' {

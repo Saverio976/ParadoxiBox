@@ -5,16 +5,17 @@ import time
 
 fn cmd_queue(cmd cli.Command) ! {
 	bearer := get_bearer() or { return error('Login first with command login') }
-	api_url := cmd.flags.get_string('url-api')!
+	api_url := get_url_api()!
 	songs := api_queue(api_url, bearer)!
 
-	println('${songs.len} Songs queued...')
+	mut i := 1
 	for song in songs {
-		println('-----> ${song.title}')
+		println('---[${i}/${songs.len}]--> ${song.title}')
 		println('artist: ${song.artist}')
 		println('url: ${song.source_link}')
 		duration := time.Duration(isize(song.duration_second) * time.second).debug()
 		println(duration)
+		i++
 	}
 }
 

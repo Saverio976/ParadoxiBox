@@ -11,16 +11,6 @@ fn main() {
 		execute: fn (cmd cli.Command) ! {
 			cmd.execute_help()
 		}
-		flags: [
-			cli.Flag{
-				flag: cli.FlagType.string
-				name: 'url-api'
-				abbrev: 'u'
-				global: true
-				description: 'ParadoxiBox api url (i.e.: http://localhost:8080/api)'
-				required: true
-			},
-		]
 		posix_mode: true
 	}
 	app.add_command(command_queue_conf)
@@ -31,6 +21,7 @@ fn main() {
 	app.add_command(command_pause_conf)
 	app.add_command(command_resume_conf)
 	app.add_command(command_create_account_conf)
+	app.add_command(command_config_conf)
 	app.setup()
 	app.parse(os.args)
 }

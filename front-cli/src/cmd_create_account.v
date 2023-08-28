@@ -38,5 +38,12 @@ const command_create_account_conf = cli.Command{
 			description: 'Username'
 			required: true
 		},
+		cli.Flag{
+			flag: cli.FlagType.string
+			name: 'url-api'
+			abbrev: 'u'
+			description: 'ParadoxiBox api url (i.e.: http://localhost:8080/api)'
+			required: true
+		},
 	]
 }
