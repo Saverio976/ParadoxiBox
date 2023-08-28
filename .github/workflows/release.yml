@@ -1,11 +1,23 @@
 name: Build and release
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types:
+      - created
+      - edited
 
 jobs:
+
+  release-notes:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: andrioid/release-defaults-bot@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release-front-cli:
     runs-on: ubuntu-latest
