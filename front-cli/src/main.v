@@ -22,6 +22,7 @@ fn main() {
 	app.add_command(command_resume_conf)
 	app.add_command(command_create_account_conf)
 	app.add_command(command_config_conf)
+	app.add_command(command_pos_conf)
 	app.setup()
 	app.parse(os.args)
 }
