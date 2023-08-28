@@ -36,7 +36,7 @@ class MusicPlayerPygame(MusicPlayer):
 
     def play(self, filepath: Path) -> bool:
         pygame.mixer.music.stop()
-        pygame.mixer.music.load(filepath)
+        pygame.mixer.music.load(str(filepath))
         self._cur_song = str(filepath)
         pygame.mixer.music.play()
         if self._paused:
@@ -74,8 +74,6 @@ class MusicPlayerPygame(MusicPlayer):
         return True
 
     def get_vol(self) -> Optional[float]:
-        if not self.has_song():
-            return None
         return float(pygame.mixer.music.get_volume() * 100.0)
 
     def get_vol_max(self) -> Optional[float]:
