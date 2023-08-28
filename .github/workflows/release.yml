@@ -84,7 +84,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: brew install clang make git libssl-dev build-essential
+        run: brew install make git openssl
 
       - name: Install vlang
         run: |
