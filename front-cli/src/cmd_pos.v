@@ -13,7 +13,7 @@ fn cmd_get_pos(cmd cli.Command) ! {
 
 const command_get_pos_conf = cli.Command{
 	name: 'get'
-	description: 'Get curren song pos'
+	description: 'Get current song pos'
 	execute: cmd_get_pos
 }
 
@@ -26,7 +26,7 @@ fn cmd_set_pos(cmd cli.Command) ! {
 
 const command_set_pos_conf = cli.Command{
 	name: 'set'
-	description: 'Set curren song pos'
+	description: 'Set current song pos'
 	execute: cmd_set_pos
 	flags: [
 		cli.Flag{
