@@ -5,11 +5,14 @@ import term
 import term.ui as tui
 import time
 
+const threshold = 2
+
 struct Queue {
 mut:
 	songs []SongQueued
 	last_updated time.Time
 	cursor_start int
+	pos int
 }
 
 struct Controller {
@@ -19,6 +22,8 @@ mut:
 	pos_button_pause tui.KeyCode
 	pos_button_resume tui.KeyCode
 	pos_button_next tui.KeyCode
+	pos_button_pos_plus tui.KeyCode
+	pos_button_pos_less tui.KeyCode
 	vol int
 	last_updated time.Time
 }
@@ -54,8 +59,16 @@ fn event(e &tui.Event, x voidptr) {
 			api_resume(app.api_url, app.bearer) or { return }
 		} else if e.code == app.controller.pos_button_vol_plus {
 			api_set_vol(app.api_url, app.bearer, app.controller.vol + 5) or { return }
+			app.controller.last_updated = app.controller.last_updated.add_seconds(- threshold - 1)
 		} else if e.code == app.controller.pos_button_vol_less {
 			api_set_vol(app.api_url, app.bearer, app.controller.vol - 5) or { return }
+			app.controller.last_updated = app.controller.last_updated.add_seconds(- threshold - 1)
+		} else if e.code == app.controller.pos_button_pos_plus {
+			api_set_pos(app.api_url, app.bearer, app.queue.pos + 5) or { return }
+			app.queue.last_updated = app.queue.last_updated.add_seconds(- threshold - 1)
+		} else if e.code == app.controller.pos_button_pos_less {
+			api_set_pos(app.api_url, app.bearer, app.queue.pos - 5) or { return }
+			app.queue.last_updated = app.queue.last_updated.add_seconds(- threshold - 1)
 		}
 	}
 }
@@ -63,8 +76,9 @@ fn event(e &tui.Event, x voidptr) {
 fn draw_queue(mut app &App, x int, y int, x1 int, y1 int) {
 	app.tui.draw_rect(x, y, x1, y1)
 
-	if time.since(app.queue.last_updated).seconds() > 2 {
+	if time.since(app.queue.last_updated).seconds() > threshold {
 		app.queue.songs = api_queue(app.api_url, app.bearer) or { [] }
+		app.queue.pos = api_get_pos(app.api_url, app.bearer) or { 0 }
 		app.queue.last_updated = time.now()
 	}
 	mut i := 1
@@ -82,8 +96,7 @@ fn draw_queue(mut app &App, x int, y int, x1 int, y1 int) {
 		song_text_init := term.bold(song.title) + ' <=> ' + song.artist + ' <=> '
 		mut song_text_duration := time.Duration(isize(song.duration_second) * time.second).str()
 		if index_song == 0 {
-			pos_cur := api_get_pos(app.api_url, app.bearer) or { 0 }
-			song_text_duration = time.Duration(pos_cur * time.second).str() + '/' + song_text_duration
+			song_text_duration = time.Duration(app.queue.pos * time.second).str() + '/' + song_text_duration
 		}
 		app.tui.draw_text(x + 1, i + y, song_text_init + song_text_duration)
 		i++
@@ -93,7 +106,7 @@ fn draw_queue(mut app &App, x int, y int, x1 int, y1 int) {
 fn draw_controller(mut app &App, x int, y int, x1 int, y1 int) {
 	app.tui.draw_rect(x, y, x1, y1)
 
-	if time.since(app.controller.last_updated).seconds() > 2 {
+	if time.since(app.controller.last_updated).seconds() > threshold {
 		app.controller.vol = api_get_vol(app.api_url, app.bearer) or { 0 }
 		app.controller.last_updated = time.now()
 	}
@@ -117,12 +130,26 @@ fn draw_controller(mut app &App, x int, y int, x1 int, y1 int) {
 	app.tui.draw_text(x + start_x, i + y, term.underline(vol_less))
 	app.controller.pos_button_vol_less = .minus
 	start_x += vol_less.len + 5
-	vol := ' volume=${app.controller.vol}'
+	vol := ' volume=${app.controller.vol} '
 	app.tui.draw_text(x + start_x, i + y, vol)
 	start_x += vol.len + 5
 	vol_plus := '++ (+)'
 	app.tui.draw_text(x + start_x, i + y, term.underline(vol_plus))
 	app.controller.pos_button_vol_plus = .plus
+	i++
+
+	start_x = 1
+	pos_less := '<- (Q)'
+	app.tui.draw_text(x + start_x, i + y, term.underline(pos_less))
+	app.controller.pos_button_pos_less = .q
+	start_x += vol_less.len + 5
+	pos := ' pos=${app.queue.pos}s '
+	app.tui.draw_text(x + start_x, i + y, pos)
+	start_x += vol.len + 5
+	pos_plus := '-> (D)'
+	app.tui.draw_text(x + start_x, i + y, term.underline(pos_plus))
+	app.controller.pos_button_pos_plus = .d
+	i++
 }
 
 
@@ -130,6 +157,7 @@ fn frame(x voidptr) {
 	mut app := unsafe { &App(x) }
 
 	app.tui.clear()
+	app.width, app.height = term.get_terminal_size()
 	draw_queue(mut app, 1, 1, app.width - 1, (app.height / 2) - 1)
 	draw_controller(mut app, 1, (app.height / 2) + 1, app.width - 1, app.height)
 	app.tui.horizontal_separator(app.height / 2)
