@@ -1,0 +1,3 @@
+[submodule "back-rewrite/musicplayer/miniaudio"]
+	path = back-rewrite/musicplayer/miniaudio
+	url = https://github.com/Larpon/miniaudio.git

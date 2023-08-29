@@ -64,10 +64,10 @@ fn event(e &tui.Event, x voidptr) {
 			api_set_vol(app.api_url, app.bearer, app.controller.vol - 5) or { return }
 			app.controller.last_updated = app.controller.last_updated.add_seconds(- threshold - 1)
 		} else if e.code == app.controller.pos_button_pos_plus {
-			api_set_pos(app.api_url, app.bearer, app.queue.pos + 5) or { return }
+			api_set_pos(app.api_url, app.bearer, app.queue.pos + 10) or { return }
 			app.queue.last_updated = app.queue.last_updated.add_seconds(- threshold - 1)
 		} else if e.code == app.controller.pos_button_pos_less {
-			api_set_pos(app.api_url, app.bearer, app.queue.pos - 5) or { return }
+			api_set_pos(app.api_url, app.bearer, app.queue.pos - 10) or { return }
 			app.queue.last_updated = app.queue.last_updated.add_seconds(- threshold - 1)
 		}
 	}
