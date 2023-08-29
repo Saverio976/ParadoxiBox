@@ -1,14 +1,29 @@
 name: Build and release
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types:
+      - created
+      - edited
 
 jobs:
 
-  release-front-cli:
+  release-notes:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: andrioid/release-defaults-bot@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-front-cli-linux-windows:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
       - name: Clone
@@ -30,20 +45,79 @@ jobs:
           make paradoxibox-cli-prod-linux
           make paradoxibox-cli-prod-windows
 
-      - name: Upload to release (binary linux)
+      - name: Upload to artifact (binary linux)
         uses: actions/upload-artifact@v3
         with:
           name: paradoxibox-cli-linux
           path: front-cli/paradoxibox-cli
 
-      - name: Upload to release (binary windows)
+      - name: Upload to artifact (binary windows)
         uses: actions/upload-artifact@v3
         with:
           name: paradoxibox-cli-windows.exe
           path: front-cli/paradoxibox-cli.exe
 
+      - name: Upload to release (binary linux)
+        uses: Shopify/upload-to-release@master
+        with:
+          name: paradoxibox-cli-linux
+          path: front-cli/paradoxibox-cli
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          content-type: application/octet-streaml
+
+      - name: Upload to release (binary windows)
+        uses: Shopify/upload-to-release@master
+        with:
+          name: paradoxibox-cli-windows.exe
+          path: front-cli/paradoxibox-cli.exe
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          content-type: application/octet-streaml
+
+  release-front-cli-macos:
+    runs-on: macos-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: brew install make git openssl
+
+      - name: Install vlang
+        run: |
+          git clone https://github.com/vlang/v.git
+          cd v
+          make
+          sudo ./v symlink
+
+      - name: Build front-cli
+        run: |
+          cd front-cli
+          make paradoxibox-cli-prod-macos
+
+      - name: Upload to artifact (binary macos)
+        uses: actions/upload-artifact@v3
+        with:
+          name: paradoxibox-cli-macos
+          path: front-cli/paradoxibox-cli
+
+      - name: Rename exe
+        run: mv front-cli/paradoxibox-cli paradoxibox-cli-macos
+
+      - name: Upload to release (binary linux)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          gh release upload "${{ github.ref_name }}" paradoxibox-cli-macos
+
   release-back:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
       - name: Clone
@@ -56,8 +130,16 @@ jobs:
       - name: Package back folder
         run: tar -zcvf paradoxibox-back.tar.gz back
 
-      - name: Upload to release (binary linux)
+      - name: Upload to artifact (python source archive)
         uses: actions/upload-artifact@v3
         with:
           name: paradoxibox-back.tar.gz
           path: paradoxibox-back.tar.gz
+
+      - name: Upload to release (python source archive)
+        uses: Shopify/upload-to-release@master
+        with:
+          name: paradoxibox-back.tar.gz
+          path: paradoxibox-back.tar.gz
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          content-type: application/gzip

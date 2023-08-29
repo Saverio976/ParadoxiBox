@@ -10,3 +10,4 @@ orjson
 mutagen
 discord.py[voice]
 requests
+json5

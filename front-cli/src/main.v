@@ -7,6 +7,7 @@ fn main() {
 	mut app := cli.Command{
 		name: os.args[0]
 		usage: os.args[0]
+		version: '0.0.2'
 		description: 'ParadoxiBox cli ( https://github.com/Saverio976/ParadoxiBox )'
 		execute: fn (cmd cli.Command) ! {
 			cmd.execute_help()
