@@ -2,6 +2,7 @@ module main
 
 import cli
 import time
+import term
 
 fn cmd_queue(cmd cli.Command) ! {
 	bearer := get_bearer() or { return error('Login first with command login') }
@@ -10,9 +11,13 @@ fn cmd_queue(cmd cli.Command) ! {
 
 	mut i := 1
 	for song in songs {
-		println('---[${i}/${songs.len}]--> ${song.title}')
-		println('artist: ${song.artist}')
-		println('url: ${song.source_link}')
+		println(term.bold(term.green('---[${i}/${songs.len}]-->')))
+		title := term.underline('title') + ': ' + term.bold(song.title)
+		println(title)
+		artist := term.underline('artist') + ': ' + song.artist
+		println(artist)
+		url := term.underline('url') + ': ' + song.source_link
+		println(url)
 		duration := time.Duration(isize(song.duration_second) * time.second)
 		if i == 1 {
 			pos_cur := api_get_pos(api_url, bearer)!
