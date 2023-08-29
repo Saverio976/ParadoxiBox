@@ -73,7 +73,7 @@ fn draw_queue(mut app &App, x int, y int, x1 int, y1 int) {
 		i++
 	}
 	app.tui.draw_text(x + 1, i + y, 'showing from index ${app.queue.cursor_start}/${app.queue.songs.len - 1}...')
-	i++
+	i = i + 2
 	for index_song in app.queue.cursor_start .. app.queue.songs.len {
 		if i + y >= y1 {
 			break
@@ -81,7 +81,7 @@ fn draw_queue(mut app &App, x int, y int, x1 int, y1 int) {
 		song := app.queue.songs[index_song]
 		song_text_init := term.bold(song.title) + ' <=> ' + song.artist + ' <=> '
 		mut song_text_duration := time.Duration(isize(song.duration_second) * time.second).str()
-		if i == 1 {
+		if index_song == 0 {
 			pos_cur := api_get_pos(app.api_url, app.bearer) or { 0 }
 			song_text_duration = time.Duration(pos_cur * time.second).str() + '/' + song_text_duration
 		}
