@@ -26,6 +26,7 @@ fn main() {
 	app.add_command(command_pos_conf)
 	app.add_command(command_vol_conf)
 	app.add_command(command_improvise_conf)
+	app.add_command(command_tui_conf)
 	app.setup()
 	app.parse(os.args)
 }
