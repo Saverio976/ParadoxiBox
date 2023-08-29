@@ -79,6 +79,7 @@ fn (mut player Player) set_pos(position int) {
 		}
 		println('sample rate: ${sample_rate}')
 		ma.sound_seek_to_pcm_frame(sound, sample_rate * u32(pos))
+		ma.sound_start(sound)
 	}
 }
 
