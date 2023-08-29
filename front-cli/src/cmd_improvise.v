@@ -36,7 +36,8 @@ const command_toggle_improvise_conf = cli.Command{
 fn cmd_now_improvise(cmd cli.Command) ! {
 	bearer := get_bearer() or { return error('Login first with command login') }
 	api_url := get_url_api()!
-	api_now_improvise(api_url, bearer)!
+	n := cmd.flags.get_int('n')!
+	api_now_improvise(api_url, bearer, n)!
 }
 
 const command_now_improvise_conf = cli.Command{

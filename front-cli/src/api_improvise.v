@@ -35,10 +35,13 @@ fn api_get_improvise(api_url string, bearer string) !bool {
 	return resp_json.improvise
 }
 
-fn api_now_improvise(api_url string, bearer string) ! {
+fn api_now_improvise(api_url string, bearer string, n int) ! {
 	resp := http.fetch(http.FetchConfig{
-		url: api_url + '/songs/improvise/auto/now'
+		url: api_url + '/songs/improvise/now'
 		method: http.Method.get
+		params: {
+			'n': n.str()
+		}
 		header: http.new_header_from_map({
 			http.CommonHeader.authorization: 'Bearer ' + bearer
 		})
