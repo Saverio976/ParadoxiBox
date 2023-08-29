@@ -1,6 +1,7 @@
 # Binaries for programs and plugins
 main
 musicplayer
+queue.txt
 *.exe
 *.exe~
 *.so
