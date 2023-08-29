@@ -21,3 +21,7 @@ fn communicate_write(lockfile string, file string, data string) {
 	}
 	lockk.release()
 }
+
+fn communicate_clear(lockfile string, file string) {
+	communicate_write(lockfile, file, "")
+}
