@@ -5,9 +5,9 @@ fn communicate_read(lockfile string, file string) string {
 	mut lockk := filelock.new(lockfile)
 	lockk.acquire() or {
 		lockk.release()
-		return ""
+		return ''
 	}
-	s := os.read_file(file) or { "" }
+	s := os.read_file(file) or { '' }
 	lockk.release()
 	return s
 }
@@ -23,5 +23,5 @@ fn communicate_write(lockfile string, file string, data string) {
 }
 
 fn communicate_clear(lockfile string, file string) {
-	communicate_write(lockfile, file, "")
+	communicate_write(lockfile, file, '')
 }

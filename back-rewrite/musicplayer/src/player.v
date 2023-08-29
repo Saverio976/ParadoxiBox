@@ -2,13 +2,13 @@ import miniaudio as ma
 
 struct Player {
 mut:
-	engine &ma.Engine
-	sound ?&ma.Sound
-	volume int = 50
+	engine    &ma.Engine
+	sound     ?&ma.Sound
+	volume    int = 50
 	is_paused bool
 pub:
 	lockfile string
-	file string
+	file     string
 }
 
 fn init_player(lockfile string, file string) !&Player {
@@ -73,7 +73,8 @@ fn (mut player Player) set_pos(position int) {
 		ma.sound_stop(sound)
 		mut sample_rate := u32(0)
 		ma.sound_seek_to_pcm_frame(sound, 0)
-		result := ma.sound_get_data_format(sound, ma.null, ma.null, sample_rate, ma.null, ma.null)
+		result := ma.sound_get_data_format(sound, ma.null, ma.null, sample_rate, ma.null,
+			ma.null)
 		if result != .success {
 			return
 		}
