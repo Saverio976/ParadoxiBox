@@ -1,13 +1,5 @@
-import vweb
-
 import os
 import flag
-
-struct App {
-	vweb.Context
-	lockfile string
-	filecom string
-}
 
 fn main() {
 	mut fp := flag.new_flag_parser(os.args)
@@ -18,7 +10,7 @@ fn main() {
 		println(fp.usage())
 		return
 	}
-	fp.description('Web API for the Music Player for ParadoxiBox')
+	fp.description('CLI the Music Player for ParadoxiBox')
 	fp.skip_executable()
 	file_lock := fp.string_opt('file-lock', `l`, 'lock file to acquire before writing/reading') or {
 		eprintln(err)
@@ -30,24 +22,17 @@ fn main() {
 		println(fp.usage())
 		return
 	}
+	title := fp.string_opt('command', `c`, 'command to send') or {
+		eprintln(err)
+		println(fp.usage())
+		return
+	}
+	value := fp.string_opt('value', `v`, 'value with the command (optional)') or { '' }
 	_ := fp.finalize() or {
 		eprintln(err)
 		println(fp.usage())
 		return
 	}
-	communicate_clear(file_lock, file)
-	mut app := new_app(file_lock, file)
-	{
-		mut db := database_connect() or { panic(err) }
-		database_init(db)
-		db.close()
-	}
-	vweb.run_at(app, vweb.RunParams{
-		port: 8080
-	}) or { panic(err) }
-}
-
-fn new_app(file_lock string, file string) &App {
-	mut app := &App{lockfile: file_lock, filecom: file}
-	return app
+	cm := musicplayer_bus(Command{title: title, value: value}, file_lock, file)
+	println(cm.nice_str())
 }
