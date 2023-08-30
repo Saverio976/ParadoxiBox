@@ -2,6 +2,7 @@
 main
 api
 db.sqlite
+musicplayer-cli
 *.exe
 *.exe~
 *.so
