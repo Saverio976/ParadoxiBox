@@ -27,7 +27,7 @@ fn interpret_data(data string, mut player Player) string {
 		}
 		'stop' {
 			player.stop()
-			return title + 'ed:OK'
+			return title + ':OK'
 		}
 		'get_volume' {
 			return title + ':' + player.get_volume().str()
@@ -42,6 +42,9 @@ fn interpret_data(data string, mut player Player) string {
 		'set_pos' {
 			pos := strconv.atoi(value) or { return title + ':KO' }
 			player.set_pos(pos)
+		}
+		'get_pos_max' {
+			return title + ':' + player.get_pos_max().str()
 		}
 		else {
 			return title + ':KO'

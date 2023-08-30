@@ -130,3 +130,18 @@ fn (mut player Player) is_paused() bool {
 	}
 	return player.is_paused
 }
+
+fn (mut player Player) get_pos_max() int {
+	if !player.has_song() {
+		return 0
+	}
+	if mut sound := player.sound {
+		mut length := f32(0)
+		result := ma.sound_get_length_in_seconds(sound, length)
+		if result != .success {
+			return 0
+		}
+		return int(length)
+	}
+	return 0
+}

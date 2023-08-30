@@ -20,7 +20,7 @@ fn loop(mut player Player) {
 		res := interpret_data(data, mut player)
 		communicate_write(player.lockfile, player.file, res)
 		last_data = res
-		if last_data.starts_with('stop') && last_data.ends_with('OK') {
+		if last_data == 'stop:OK' {
 			stop = true
 		}
 	}
