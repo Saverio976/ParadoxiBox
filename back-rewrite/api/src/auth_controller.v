@@ -1,6 +1,6 @@
 import vweb
 
-['/auth/create'; get]
+['/api/auth/create'; get]
 pub fn (mut app App) page_auth_create() vweb.Result {
 	if !['username', 'password'].all(it in app.query) {
 		return app.not_found()
@@ -21,7 +21,7 @@ pub fn (mut app App) page_auth_create() vweb.Result {
 	return app.ok('true')
 }
 
-['/auth/login'; get]
+['/api/auth/login'; get]
 pub fn (mut app App) page_auth_login() vweb.Result {
 	if !['username', 'password'].all(it in app.query) {
 		return app.not_found()
@@ -42,7 +42,7 @@ pub fn (mut app App) page_auth_login() vweb.Result {
 	return app.ok(bearer)
 }
 
-['/auth/logout'; get]
+['/api/auth/logout'; get]
 pub fn (mut app App) page_auth_logout() vweb.Result {
 	if 'bearer' !in app.query {
 		return app.not_found()
@@ -63,7 +63,7 @@ pub fn (mut app App) page_auth_logout() vweb.Result {
 	return app.ok('true')
 }
 
-['/auth/delete'; get]
+['/api/auth/delete'; get]
 pub fn (mut app App) page_auth_delete() vweb.Result {
 	if 'bearer' !in app.query {
 		return app.not_found()

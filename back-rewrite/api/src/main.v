@@ -3,10 +3,13 @@ import vweb
 import os
 import flag
 
+import player_service
+
 struct App {
 	vweb.Context
 	lockfile string
 	filecom string
+	player_conn player_service.Connection
 }
 
 fn main() {
@@ -20,7 +23,7 @@ fn main() {
 	}
 	fp.description('Web API for the Music Player for ParadoxiBox')
 	fp.skip_executable()
-	file_lock := fp.string_opt('file-lock', `l`, 'lock file to acquire before writing/reading') or {
+	lockfile := fp.string_opt('lockfile', `l`, 'lock file to acquire before writing/reading') or {
 		eprintln(err)
 		println(fp.usage())
 		return
@@ -35,8 +38,7 @@ fn main() {
 		println(fp.usage())
 		return
 	}
-	communicate_clear(file_lock, file)
-	mut app := new_app(file_lock, file)
+	mut app := new_app(lockfile, file)
 	{
 		mut db := database_connect() or { panic(err) }
 		database_init(db)
@@ -47,7 +49,11 @@ fn main() {
 	}) or { panic(err) }
 }
 
-fn new_app(file_lock string, file string) &App {
-	mut app := &App{lockfile: file_lock, filecom: file}
+fn new_app(lockfile string, file string) &App {
+	mut app := &App{
+		lockfile: lockfile
+		filecom: file
+		player_conn: player_service.start_connection(lockfile, file) or { panic(err) }
+	}
 	return app
 }
