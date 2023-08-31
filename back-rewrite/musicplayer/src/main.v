@@ -8,11 +8,13 @@ fn loop(mut player Player) {
 	mut last_data := ''
 	mut stop := false
 
-	for {
-		time.sleep(time.millisecond)
-		if stop {
-			break
+	for !stop {
+		if !player.has_song() {
+			player.next() or {
+				eprintln(err)
+			}
 		}
+		time.sleep(time.millisecond)
 		data := communicate_read(player.lockfile, player.file)
 		if data == last_data {
 			continue

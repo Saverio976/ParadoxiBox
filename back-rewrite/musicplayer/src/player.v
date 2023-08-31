@@ -1,4 +1,5 @@
 import miniaudio as ma
+import io.util as ioutil
 
 struct Player {
 mut:
@@ -6,6 +7,8 @@ mut:
 	sound     ?&ma.Sound
 	volume    int = 50
 	is_paused bool
+	playlist  []string
+	playlist_path ?string
 pub:
 	lockfile string
 	file     string
@@ -37,10 +40,23 @@ fn (mut player Player) stop() {
 	}
 }
 
-fn (mut player Player) play_sound(file string) ! {
+fn (mut player Player) next() ! {
+	player.stop()
+	player.playlist_path = none
+	if player.playlist.len == 0 {
+		return
+	}
+	player.playlist.delete(0)
+	player.play_current()!
+}
+
+fn (mut player Player) play_current() ! {
+	if player.playlist.len == 0 {
+		return
+	}
 	player.stop()
 	mut sound := &ma.Sound{}
-	result := ma.sound_init_from_file(player.engine, file.str, 0, ma.null, ma.null, sound)
+	result := ma.sound_init_from_file(player.engine, player.playlist[0].str, 0, ma.null, ma.null, sound)
 	if result != .success {
 		return error('Failed to init miniaudio sound')
 	}
@@ -48,6 +64,13 @@ fn (mut player Player) play_sound(file string) ! {
 		ma.sound_start(sound)
 	}
 	player.sound = sound
+}
+
+fn (mut player Player) play_sound(file string) ! {
+	player.playlist << file
+	if player.playlist.len == 1 {
+		player.play_current()!
+	}
 }
 
 fn (mut player Player) pause() {
@@ -144,4 +167,19 @@ fn (mut player Player) get_pos_max() int {
 		return int(length)
 	}
 	return 0
+}
+
+fn (mut player Player) get_playlist() !string {
+	if path := player.playlist_path {
+		return path
+	}
+	mut fd, path := ioutil.temp_file(ioutil.TempFileOptions{})!
+	defer {
+		fd.close()
+	}
+	for song_path in player.playlist {
+		fd.writeln(song_path)!
+	}
+	player.playlist_path = path
+	return path
 }

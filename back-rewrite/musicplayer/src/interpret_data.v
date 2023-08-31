@@ -46,6 +46,12 @@ fn interpret_data(data string, mut player Player) string {
 		'get_pos_max' {
 			return title + ':' + player.get_pos_max().str()
 		}
+		'next' {
+			player.next() or { return title + ':KO' }
+		}
+		'queue' {
+			return title + ':' + player.get_playlist() or { 'KO' }
+		}
 		else {
 			return title + ':KO'
 		}
