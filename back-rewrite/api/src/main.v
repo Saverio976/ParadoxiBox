@@ -33,6 +33,11 @@ fn main() {
 		println(fp.usage())
 		return
 	}
+	port := fp.int_opt('port', `p`, 'port to use') or {
+		eprintln(err)
+		println(fp.usage())
+		return
+	}
 	_ := fp.finalize() or {
 		eprintln(err)
 		println(fp.usage())
@@ -45,7 +50,7 @@ fn main() {
 		db.close()
 	}
 	vweb.run_at(app, vweb.RunParams{
-		port: 8080
+		port: port
 	}) or { panic(err) }
 }
 

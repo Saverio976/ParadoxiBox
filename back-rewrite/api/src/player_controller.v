@@ -1,20 +1,32 @@
 import vweb
 
-// TODO: queue
 ['/api/songs/queue'; get]
 pub fn (mut app App) page_songs_queue() vweb.Result {
+	app.error('test 1')
+	id := app.player_conn.send_command('queue', '')
+	app.error('test 2')
+	resp := app.player_conn.get_response(id) or {
+		app.error(err.msg())
+		return app.server_error(500)
+	}
+	if resp.value == 'KO' {
+		app.error('/api/songs/queue = KO')
+		return app.server_error(500)
+	}
 	return app.ok('true')
 }
 
-// TODO: queue current
-['/api/songs/queue/current'; get]
-pub fn (mut app App) page_songs_queue_current() vweb.Result {
-	return app.ok('true')
-}
-
-// TODO: next
 ['/api/songs/queue/next'; get]
 pub fn (mut app App) page_songs_queue_next() vweb.Result {
+	id := app.player_conn.send_command('next', '')
+	resp := app.player_conn.get_response(id) or {
+		app.error(err.msg())
+		return app.server_error(500)
+	}
+	if resp.value == 'KO' {
+		app.error('/api/songs/queue/next = KO')
+		return app.server_error(500)
+	}
 	return app.ok('true')
 }
 
@@ -168,7 +180,7 @@ pub fn (mut app App) page_songs_volume_set() vweb.Result {
 }
 
 ['/api/songs/volume'; get]
-pub fn (mut app App) page_songs_queue_current_pos_next() vweb.Result {
+pub fn (mut app App) page_songs_volume() vweb.Result {
 	id := app.player_conn.send_command('get_pos', '')
 	resp := app.player_conn.get_response(id) or {
 		app.error(err.msg())

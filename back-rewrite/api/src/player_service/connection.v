@@ -10,17 +10,23 @@ pub struct Connection {
 
 fn bus_connection(commands chan Command, shared responses map[int]Response, lockfile string, file string) int {
 	mut stop := false
-	for !stop {
-		if !select {
+	for !stop && commands.closed == false {
+		eprintln('loop')
+		select {
 			cm := <- commands {
+				eprintln('this -1')
 				s := cm.str()
 				communicate_write(lockfile, file, s)
 				mut data := s
+				eprintln('this 0')
 				for data == s {
 					time.sleep(time.microsecond)
 					data = communicate_read(lockfile, file)
+					eprintln('this 1')
 				}
+				eprintln('this 2')
 				rsplit, lsplit := split_data(data)
+				eprintln('this 3')
 				res := Response{
 					title: rsplit
 					value: lsplit
@@ -32,8 +38,6 @@ fn bus_connection(commands chan Command, shared responses map[int]Response, lock
 					responses[cm.id] = res
 				}
 			}
-		} {
-			stop = true
 		}
 	}
 	return 0
@@ -52,8 +56,11 @@ pub fn start_connection(lockfile string, file string) !Connection {
 }
 
 pub fn (cn Connection) send_command(title string, value string) int {
+	eprintln('err 1')
 	cm := new_command(title, value)
+	eprintln('err 2')
 	cn.commands <- cm
+	eprintln('err 3')
 	return cm.id
 }
 

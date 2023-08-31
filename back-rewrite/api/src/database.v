@@ -13,6 +13,15 @@ struct User {
 	bearer string
 }
 
+struct Song {
+	path string [primary; unique]
+	title string [nonull]
+	artists string
+	duration int [nonull]
+	thumbnail_url string
+	source_url string
+}
+
 fn database_connect() !DataBase {
 	db := sqlite.connect('db.sqlite')!
 	return DataBase{db: db}
@@ -21,6 +30,9 @@ fn database_connect() !DataBase {
 fn database_init(db DataBase) {
 	sql db.db {
 		create table User
+	} or { panic(err) }
+	sql db.db {
+		create table Song
 	} or { panic(err) }
 }
 
@@ -92,4 +104,33 @@ fn (mut db DataBase) close() {
 fn hash_data(data string) string {
 	hash := sha512.hexhash(data)
 	return hash
+}
+
+fn (mut db DataBase) get_song(path string) !Song {
+	songs := sql db.db {
+		select from Song where path == path limit 1
+	}!
+	if songs.len != 1 {
+		return error('song ${path} found ${songs.len} entries')
+	}
+	return songs[0]
+}
+
+fn new_unknow_song() Song {
+	return Song{
+		path: 'UNKNOW'
+		title: 'UNKNOW'
+		artists: 'UNKNOW'
+		duration: 42
+		thumbnail_url: 'UNKNOW'
+		source_url: 'UNKNOW'
+	}
+}
+
+fn (mut db DataBase) bulk_create_song(songs []Song) ! {
+	for song in songs {
+		sql db.db {
+			insert song into Song
+		}!
+	}
 }

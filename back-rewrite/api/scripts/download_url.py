@@ -7,7 +7,7 @@ from datetime import timedelta
 from argparse import ArgumentParser
 
 import sys
-import os
+import json
 
 import yt_dlp
 
@@ -16,15 +16,25 @@ def logger_print(*args, **kwargs):
 
 @dataclass
 class Song:
+    path: str
     title: str
-    artist: List[str]
-    source_link: str
-    path_music: str
-    duration: str
-    thumbnail: str
+    artists: str
+    source_url: str
+    duration: int
+    thumbnail_url: str
+
+    def __json__(self):
+        return {
+            "path": self.path,
+            "title": self.title,
+            "artists": self.artists,
+            "source_url": self.source_url,
+            "duration": self.duration,
+            "thumbnail_url": self.thumbnail_url
+        }
 
 def download_song_ytdl(
-    output: str, url: str, noplaylist: bool = False, format: str = "mp3"
+    home_path: str, url: str, noplaylist: bool = False, format: str = "mp3"
 ) -> Optional[List[Song]]:
     ydl_opts = {
         "format": f"{format}/bestaudio/best",
@@ -36,7 +46,7 @@ def download_song_ytdl(
             }
         ],
         "paths": {
-            "home": f"{os.path.dirname(output)}",
+            "home": f"{home_path}",
         },
     }
     logger_print(f"YTDLP:: downloading:: noplaylist={noplaylist}: url={url}")
@@ -66,11 +76,11 @@ def download_song_ytdl(
         title = entry["title"]
         song = Song(
             title=title,
-            artist=artist,
-            source_link=source_link,
-            path_music=path_music,
-            duration=str(int(duration.total_seconds())),
-            thumbnail=thumbnail,
+            artists=artist,
+            source_url=source_link,
+            path=path_music,
+            duration=int(duration.total_seconds()),
+            thumbnail_url=thumbnail,
         )
         saved.append(song)
     logger_print(f"YTDLP:: download finished:: url={url}")
@@ -88,7 +98,7 @@ def main() -> int:
         "--format", type=str, default="mp3", help="The format to download."
     )
     parser.add_argument(
-        "--output", type=str, help="The file output"
+        "--home", type=str, help="The folder where to download"
     )
     result = parser.parse_args()
     songs = download_song_ytdl(
@@ -98,8 +108,7 @@ def main() -> int:
     )
     if not songs:
         return 1
-    for song in songs:
-        print(song)
+    print(json.dumps({"songs": list(map(lambda x: x.__json__(), songs))}))
     return 0
 
 if __name__ == "__main__":
