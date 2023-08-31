@@ -1,6 +1,0 @@
-{
-    "musicplayer":
-        ["pygame"]                      // For pygame audio backend (sdl2 under).
-        // ["discordpy"]                // For discord.py audio backend (need to provide a bot token and a voice channel id).
-        // ["pygame", "discordpy"]      // If you want the 2.
-}
