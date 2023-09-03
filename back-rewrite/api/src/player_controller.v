@@ -3,9 +3,7 @@ import vweb
 ['/api/songs/queue'; get]
 pub fn (mut app App) page_songs_queue() vweb.Result {
 	app.error('test 1')
-	id := app.player_conn.send_command('queue', '')
-	app.error('test 2')
-	resp := app.player_conn.get_response(id) or {
+	resp := app.player_conn.send_command('queue', '') or {
 		app.error(err.msg())
 		return app.server_error(500)
 	}
@@ -18,8 +16,7 @@ pub fn (mut app App) page_songs_queue() vweb.Result {
 
 ['/api/songs/queue/next'; get]
 pub fn (mut app App) page_songs_queue_next() vweb.Result {
-	id := app.player_conn.send_command('next', '')
-	resp := app.player_conn.get_response(id) or {
+	resp := app.player_conn.send_command('next', '') or {
 		app.error(err.msg())
 		return app.server_error(500)
 	}
@@ -35,8 +32,7 @@ pub fn (mut app App) page_songs_queue_current_pos_set() vweb.Result {
 	if 'pos' !in app.query {
 		return app.not_found()
 	}
-	id := app.player_conn.send_command('set_pos', app.query['pos'])
-	resp := app.player_conn.get_response(id) or {
+	resp := app.player_conn.send_command('set_pos', app.query['pos']) or {
 		app.error(err.msg())
 		return app.server_error(500)
 	}
@@ -49,8 +45,7 @@ pub fn (mut app App) page_songs_queue_current_pos_set() vweb.Result {
 
 ['/api/songs/queue/current/pos'; get]
 pub fn (mut app App) page_songs_queue_current_pos_next() vweb.Result {
-	id := app.player_conn.send_command('get_pos', '')
-	resp := app.player_conn.get_response(id) or {
+	resp := app.player_conn.send_command('get_pos', '') or {
 		app.error(err.msg())
 		return app.server_error(500)
 	}
@@ -75,7 +70,7 @@ pub fn (mut app App) page_songs_queue_add_song_query() vweb.Result {
 	if 'query' !in app.query {
 		return app.not_found()
 	}
-	go download_song_query(app.query['query'], app.player_conn)
+	download_song_query(app.query['query'], app.player_conn)
 	return app.ok('processing')
 }
 
@@ -90,8 +85,7 @@ pub fn (mut app App) page_songs_queue_add_playlist_url() vweb.Result {
 
 ['/api/songs/pause'; get]
 pub fn (mut app App) page_songs_pause() vweb.Result {
-	id := app.player_conn.send_command('pause', '')
-	resp := app.player_conn.get_response(id) or {
+	resp := app.player_conn.send_command('pause', '') or {
 		app.error(err.msg())
 		return app.server_error(500)
 	}
@@ -104,8 +98,7 @@ pub fn (mut app App) page_songs_pause() vweb.Result {
 
 ['/api/songs/resume'; get]
 pub fn (mut app App) page_songs_resume() vweb.Result {
-	id := app.player_conn.send_command('resume', '')
-	resp := app.player_conn.get_response(id) or {
+	resp := app.player_conn.send_command('resume', '') or {
 		app.error(err.msg())
 		return app.server_error(500)
 	}
@@ -118,8 +111,7 @@ pub fn (mut app App) page_songs_resume() vweb.Result {
 
 ['/api/songs/is-paused'; get]
 pub fn (mut app App) page_songs_is_paused() vweb.Result {
-	id := app.player_conn.send_command('get_pause', '')
-	resp := app.player_conn.get_response(id) or {
+	resp := app.player_conn.send_command('get_pause', '') or {
 		app.error(err.msg())
 		return app.server_error(500)
 	}
@@ -132,8 +124,7 @@ pub fn (mut app App) page_songs_is_paused() vweb.Result {
 
 ['/api/songs/stop'; get]
 pub fn (mut app App) page_songs_stop() vweb.Result {
-	id := app.player_conn.send_command('stop', '')
-	resp := app.player_conn.get_response(id) or {
+	resp := app.player_conn.send_command('stop', '') or {
 		app.error(err.msg())
 		return app.server_error(500)
 	}
@@ -167,8 +158,7 @@ pub fn (mut app App) page_songs_volume_set() vweb.Result {
 	if 'vol' !in app.query {
 		return app.not_found()
 	}
-	id := app.player_conn.send_command('set_volume', app.query['vol'])
-	resp := app.player_conn.get_response(id) or {
+	resp := app.player_conn.send_command('set_volume', app.query['vol']) or {
 		app.error(err.msg())
 		return app.server_error(500)
 	}
@@ -181,8 +171,7 @@ pub fn (mut app App) page_songs_volume_set() vweb.Result {
 
 ['/api/songs/volume'; get]
 pub fn (mut app App) page_songs_volume() vweb.Result {
-	id := app.player_conn.send_command('get_pos', '')
-	resp := app.player_conn.get_response(id) or {
+	resp := app.player_conn.send_command('get_pos', '') or {
 		app.error(err.msg())
 		return app.server_error(500)
 	}

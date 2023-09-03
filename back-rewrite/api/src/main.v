@@ -9,6 +9,7 @@ struct App {
 	vweb.Context
 	lockfile string
 	filecom string
+mut:
 	player_conn player_service.Connection
 }
 
@@ -51,6 +52,7 @@ fn main() {
 	}
 	vweb.run_at(app, vweb.RunParams{
 		port: port
+		nr_workers: 1
 	}) or { panic(err) }
 }
 

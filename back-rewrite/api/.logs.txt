@@ -1,0 +1,7 @@
+python3 'scripts/search_song.py' 'neoni darkside'
+python3 'scripts/download_url.py' '--format' 'm4a' '--home' '/home/saverio/Documents/perso/ParadoxiBox/back-rewrite/api/songs' 'https://music.youtube.com/watch?v=9w10POjtz8M
+' '--noplaylist'
+!!! output: {"songs":[{"path":"/home/saverio/Documents/perso/ParadoxiBox/back-rewrite/api/songs/DARKSIDE [9w10POjtz8M].mp3","title":"DARKSIDE","artists":"Neoni","source_url":"https://www.youtube.com/watch?v=9w10POjtz8M","duration":168,"thumbnail_url":"https://i.ytimg.com/vi_webp/9w10POjtz8M/maxresdefault.webp"}]}
+ !!!
+!!! download_url:: songs len: 1 !!!
+lock failederror playing

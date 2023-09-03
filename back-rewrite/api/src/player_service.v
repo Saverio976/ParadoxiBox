@@ -4,12 +4,22 @@ import arrays
 import json
 import os
 
+pub struct SongP {
+	path string
+	title string
+	artists string
+	source_url string
+	duration int
+	thumbnail_url string
+}
+
 pub struct ScriptDownloadRes {
-	songs []Song
+	songs []SongP
 }
 
 fn exec_python(python_script string, params []string) !string {
 	cmd := 'python3 \'' + python_script + '\' ' + arrays.join_to_string[string](params, ' ', fn (s string) string { return "'" + s + "'" })
+	eprintln(cmd)
 	res := os.execute(cmd)
 	if res.exit_code != 0 {
 		return error('invalid return code ${res.exit_code}')
@@ -17,14 +27,23 @@ fn exec_python(python_script string, params []string) !string {
 	return res.output
 }
 
-fn download_url(url string, no_playlist bool) []Song {
+fn download_url(url string, no_playlist bool) []SongP {
 	home := os.abs_path(os.join_path_single(os.dir(os.executable()), 'songs'))
 	mut args := ['--format', 'm4a', '--home', home, url]
 	if no_playlist {
 		args << '--noplaylist'
 	}
-	output := exec_python('scripts/download_url.py', args ) or { '{"songs": []}' }
-	songs := json.decode(ScriptDownloadRes, output) or { ScriptDownloadRes{} }
+	output := exec_python('scripts/download_url.py', args ) or {
+		eprintln(err.msg() + '::Error downloading')
+		return []SongP{}
+	}
+	eprintln('!!! output: ${output} !!!')
+	songs := json.decode(ScriptDownloadRes, output) or {
+		eprintln('${err.msg()} ::Error decoding json:: ${output}')
+		eprintln("Im here")
+		return []SongP{}
+	}
+	eprintln('!!! download_url:: songs len: ${songs.songs.len} !!!')
 	return songs.songs
 }
 
@@ -40,11 +59,11 @@ fn search_song(query string) ?string {
 fn download_song_url(url string, player_conn player_service.Connection) int {
 	songs := download_url(url, true)
 	if songs.len != 1 {
+		eprintln('download_url:: songs len: ${songs.len}')
 		return 1
 	}
-	id := player_conn.send_command('play', songs[0].path)
-	resp := player_conn.get_response(id) or {
-		eprintln(err.msg())
+	resp := player_conn.send_command('play', songs[0].path) or {
+		eprintln(err.msg() + 'error playing')
 		return 1
 	}
 	if resp.value == 'KO' {
@@ -65,9 +84,8 @@ fn download_playlist_url(url string, player_conn player_service.Connection) int 
 	songs := download_url(url, true)
 	mut is_error := false
 	for song in songs {
-		id := player_conn.send_command('play', song.path)
-		resp := player_conn.get_response(id) or {
-			eprintln(err.msg())
+		resp := player_conn.send_command('play', song.path) or {
+			eprintln(err.msg() + 'Error playing')
 			is_error = true
 			return 1
 		}

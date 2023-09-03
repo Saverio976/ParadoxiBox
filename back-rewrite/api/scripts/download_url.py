@@ -7,12 +7,14 @@ from datetime import timedelta
 from argparse import ArgumentParser
 
 import sys
-import json
+import orjson
+
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.CRITICAL)
 
 import yt_dlp
-
-def logger_print(*args, **kwargs):
-    print(*args, **kwargs, file=sys.stderr)
 
 @dataclass
 class Song:
@@ -37,8 +39,11 @@ def download_song_ytdl(
     home_path: str, url: str, noplaylist: bool = False, format: str = "mp3"
 ) -> Optional[List[Song]]:
     ydl_opts = {
+        "quiet": True,
+        "no_warnings": True,
         "format": f"{format}/bestaudio/best",
         "noplaylist": noplaylist,
+        "logger": logger,
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
@@ -49,7 +54,6 @@ def download_song_ytdl(
             "home": f"{home_path}",
         },
     }
-    logger_print(f"YTDLP:: downloading:: noplaylist={noplaylist}: url={url}")
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         datas = ydl.extract_info(f"{url}", download=True)
     if not datas:
@@ -83,7 +87,6 @@ def download_song_ytdl(
             thumbnail_url=thumbnail,
         )
         saved.append(song)
-    logger_print(f"YTDLP:: download finished:: url={url}")
     return saved
 
 def main() -> int:
@@ -108,7 +111,7 @@ def main() -> int:
     )
     if not songs:
         return 1
-    print(json.dumps({"songs": list(map(lambda x: x.__json__(), songs))}))
+    print(orjson.dumps({"songs": list(map(lambda x: x.__json__(), songs))}).decode('utf-8'))
     return 0
 
 if __name__ == "__main__":
